@@ -1,0 +1,425 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\employee.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\attendancestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\attendancestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\department.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\department.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\leavestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\leavestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\auditlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\auditlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\daytype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\daytype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\attendancerecord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\attendancerecord.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\attendancedevicelog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\attendancedevicelog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\attendancesource.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\attendancesource.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\shiftassignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\shiftassignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\systemsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\systemsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\useraccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\useraccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\leaverequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\leaverequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\holiday.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\holiday.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\facetemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\facetemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\shift.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\shift.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\salarystructure.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\salarystructure.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\position.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\position.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\payrollperiod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\payrollperiod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\paycomponenttype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\paycomponenttype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\paycomponent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\paycomponent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\leavetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\leavetype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|d:\\sp26\\1_swd392\\hrms.faceattendance\\hrms.domain\\entities\\payrollitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1D365F1-6B42-4A55-8588-A76CE4FAA500}|Hrms.Domain\\Hrms.Domain.csproj|solutionrelative:hrms.domain\\entities\\payrollitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AttendanceRecord.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceRecord.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\AttendanceRecord.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceRecord.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\AttendanceRecord.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:19:36.247Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "AttendanceSource.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceSource.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\AttendanceSource.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceSource.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\AttendanceSource.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:19:15.727Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AttendanceStatus.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceStatus.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\AttendanceStatus.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceStatus.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\AttendanceStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:18:53.406Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "DayType.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\DayType.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\DayType.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\DayType.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\DayType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:16:10.165Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuditLog.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AuditLog.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\AuditLog.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AuditLog.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\AuditLog.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:25:32.037Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Employee.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Employee.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\Employee.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Employee.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\Employee.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAADwvx8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:14:59.079Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "LeaveStatus.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\LeaveStatus.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\LeaveStatus.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\LeaveStatus.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\LeaveStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:20:39.509Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Department.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Department.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\Department.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Department.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\Department.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:15:23.155Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "AttendanceDeviceLog.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceDeviceLog.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\AttendanceDeviceLog.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\AttendanceDeviceLog.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\AttendanceDeviceLog.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:20:13.648Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Role.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Role.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\Role.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Role.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\Role.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:24:43.672Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ShiftAssignment.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\ShiftAssignment.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\ShiftAssignment.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\ShiftAssignment.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\ShiftAssignment.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:17:40.832Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "SystemSetting.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\SystemSetting.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\SystemSetting.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\SystemSetting.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\SystemSetting.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:25:56.13Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "UserAccount.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\UserAccount.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\UserAccount.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\UserAccount.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\UserAccount.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:24:28.236Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "UserRole.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\UserRole.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\UserRole.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\UserRole.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\UserRole.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:25:07.923Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "LeaveRequest.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\LeaveRequest.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\LeaveRequest.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\LeaveRequest.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\LeaveRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:21:24.227Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Holiday.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Holiday.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\Holiday.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Holiday.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\Holiday.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:18:11.069Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "FaceTemplate.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\FaceTemplate.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\FaceTemplate.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\FaceTemplate.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\FaceTemplate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:18:31.077Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Shift.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Shift.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\Shift.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Shift.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\Shift.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA0AAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:17:14.077Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "SalaryStructure.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\SalaryStructure.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\SalaryStructure.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\SalaryStructure.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\SalaryStructure.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:21:50.116Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Position.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Position.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\Position.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\Position.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\Position.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAYwAYAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:15:48.095Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "PayrollPeriod.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayrollPeriod.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\PayrollPeriod.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayrollPeriod.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\PayrollPeriod.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:23:31.746Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "PayComponentType.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayComponentType.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\PayComponentType.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayComponentType.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\PayComponentType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:22:11.826Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "PayComponent.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayComponent.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\PayComponent.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayComponent.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\PayComponent.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:22:57.733Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "LeaveType.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\LeaveType.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\LeaveType.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\LeaveType.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\LeaveType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:20:57.789Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "PayrollItem.cs",
+              "DocumentMoniker": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayrollItem.cs",
+              "RelativeDocumentMoniker": "Hrms.Domain\\Entities\\PayrollItem.cs",
+              "ToolTip": "D:\\SP26\\1_SWD392\\Hrms.FaceAttendance\\Hrms.Domain\\Entities\\PayrollItem.cs",
+              "RelativeToolTip": "Hrms.Domain\\Entities\\PayrollItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-11T11:24:02.017Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
