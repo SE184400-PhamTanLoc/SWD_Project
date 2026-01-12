@@ -9,25 +9,15 @@
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
 
-        public Guid DepartmentId { get; set; }
-        public Department Department { get; set; } = null!;
-
-        public Guid PositionId { get; set; }
-        public Position Position { get; set; } = null!;
+        public Guid? DepartmentId { get; set; }
+        public Department? Department { get; set; }
 
         public DateTime HireDate { get; set; }
         public bool IsActive { get; set; } = true;
 
-        // Lương & cấu trúc lương hiện tại
-        public Guid SalaryStructureId { get; set; }
-        public SalaryStructure SalaryStructure { get; set; } = null!;
-
-        // Navigation
+        // Navigation properties - CHỈ GIỮ PHẦN CHẤM CÔNG
         public ICollection<ShiftAssignment> ShiftAssignments { get; set; } = new List<ShiftAssignment>();
         public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = new List<AttendanceRecord>();
-        public ICollection<LeaveRequest> LeaveRequests { get; set; } = new List<LeaveRequest>();
-        public ICollection<PayrollItem> PayrollItems { get; set; } = new List<PayrollItem>();
         public FaceTemplate? FaceTemplate { get; set; }
     }
-
 }
