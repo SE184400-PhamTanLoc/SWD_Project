@@ -1,0 +1,50 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Hrms.Application.Interface;
+using Hrms.Infrastructure.Data;
+using Hrms.Infrastructure.Repositories;
+
+namespace Hrms.Infrastructure.DependencyInjection
+{
+    /// <summary>
+    /// Class đăng ký tất cả services của Infrastructure layer
+    /// </summary>
+    public static class InfrastructureDI
+    {
+        /// <summary>
+        /// Đăng ký tất cả services của Infrastructure layer
+        /// </summary>
+        public static IServiceCollection AddInfrastructureServices(
+            this IServiceCollection services, 
+            IConfiguration configuration)
+        {
+            // ========== DATABASE CONFIGURATION ==========
+            // Đăng ký DbContext với SQL Server
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(connectionString));
+
+            // ========== REPOSITORIES ==========
+            // Đăng ký tất cả repositories (Repository Pattern - không dùng UnitOfWork)
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<IUserAccountRepository, UserAccountRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddScoped<IShiftRepository, ShiftRepository>();
+            services.AddScoped<IShiftAssignmentRepository, ShiftAssignmentRepository>();
+            services.AddScoped<IFaceTemplateRepository, FaceTemplateRepository>();
+            services.AddScoped<IAttendanceRecordRepository, AttendanceRecordRepository>();
+            services.AddScoped<IAttendanceSummaryRepository, AttendanceSummaryRepository>();
+            services.AddScoped<IIoTDeviceRepository, IoTDeviceRepository>();
+            services.AddScoped<IProductionLineRepository, ProductionLineRepository>();
+            services.AddScoped<IManagementRepository, ManagementRepository>();
+            services.AddScoped<ISystemLogRepository, SystemLogRepository>();
+            services.AddScoped<IAttendanceDeviceLogRepository, AttendanceDeviceLogRepository>();
+
+            return services;
+        }
+    }
+}

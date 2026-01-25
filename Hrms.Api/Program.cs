@@ -1,24 +1,131 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Hrms.Application.DependencyInjection;
+using Hrms.Infrastructure.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ========== CONFIGURATION ==========
+var configuration = builder.Configuration;
 
+// ========== DEPENDENCY INJECTION ==========
+// Đăng ký tất cả services từ các layers
+builder.Services.AddInfrastructureServices(configuration);  // Database, Repositories
+builder.Services.AddApplicationServices();                  // MediatR, FluentValidation, Application Services
+
+// ========== API SERVICES ==========
+// Controllers
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// CORS Configuration - Cho phép ESP32-CAM và Mobile app gọi API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+// JWT Authentication
+var jwtSettings = configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"] ?? "YourSuperSecretKeyForJWTTokenGeneration-Minimum32Characters!";
+var issuer = jwtSettings["Issuer"] ?? "Hrms.FaceAttendance";
+var audience = jwtSettings["Audience"] ?? "Hrms.FaceAttendance";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        ClockSkew = TimeSpan.Zero // Không cho phép sai lệch thời gian
+    };
+});
+
+builder.Services.AddAuthorization();
+
+// Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "HRMS Face Attendance API",
+        Version = "v1",
+        Description = "API cho hệ thống chấm công bằng nhận diện khuôn mặt"
+    });
+
+    // Thêm JWT Authentication vào Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// HttpClient - Đăng ký HttpClient để gọi Python AI Service
+builder.Services.AddHttpClient("PythonAIService", client =>
+{
+    var pythonServiceUrl = configuration["PythonAIService:BaseUrl"] ?? "http://localhost:5000";
+    client.BaseAddress = new Uri(pythonServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ========== MIDDLEWARE PIPELINE ==========
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "HRMS Face Attendance API v1");
+    });
 }
 
 app.UseHttpsRedirection();
 
+// CORS phải đặt trước Authentication
+app.UseCors("AllowAll");
+
+// Authentication & Authorization
+app.UseAuthentication();
 app.UseAuthorization();
+
+// Exception handling middleware (có thể thêm sau)
+// app.UseExceptionHandler();
 
 app.MapControllers();
 
