@@ -14,7 +14,7 @@ namespace Hrms.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<AttendanceDeviceLog>> GetByDeviceIdAsync(Guid deviceId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<AttendanceDeviceLog>> GetByDeviceIdAsync(int deviceId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .Where(adl => adl.DeviceId == deviceId)

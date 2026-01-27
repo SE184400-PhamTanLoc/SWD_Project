@@ -14,6 +14,12 @@ namespace Hrms.Api.Controllers
     [Route("api/[controller]")]
     public class AttendanceController : ControllerBase
     {
+        public class FaceCheckInForm
+        {
+            public IFormFile File { get; set; } = null!;
+            public string? DeviceId { get; set; }
+        }
+
         private readonly IMediator _mediator;
         private readonly ILogger<AttendanceController> _logger;
 
@@ -22,102 +28,49 @@ namespace Hrms.Api.Controllers
             _mediator = mediator;
             _logger = logger;
         }
-
+ 
         /// <summary>
-        /// Xử lý check-in
-        /// POST /api/attendance/checkin
+        /// Xử lý face check-in/check-out từ ESP32-CAM hoặc Upload tay
+        /// POST /api/attendance/face-checkin
         /// </summary>
-        [HttpPost("checkin")]
-        [AllowAnonymous] // Cho phép ESP32-CAM gọi sau khi nhận diện face
-        public async Task<ActionResult<CheckInResponseDto>> CheckIn([FromBody] CheckInRequestDto request)
-        {
-            try
-            {
-                var command = new CheckInCommand
-                {
-                    EmployeeId = request.EmployeeId,
-                    DeviceId = request.DeviceId,
-                    CheckInTime = request.CheckInTime
-                };
-
-                var result = await _mediator.Send(command);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during check-in for employee: {EmployeeId}", request.EmployeeId);
-                return StatusCode(500, new CheckInResponseDto
-                {
-                    Success = false,
-                    Message = "Đã xảy ra lỗi khi check-in"
-                });
-            }
-        }
-
-        /// <summary>
-        /// Xử lý check-out
-        /// POST /api/attendance/checkout
-        /// </summary>
-        [HttpPost("checkout")]
+        [HttpPost("face-checkin")]
         [AllowAnonymous]
-        public async Task<ActionResult<CheckInResponseDto>> CheckOut([FromBody] CheckInRequestDto request)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<FaceCheckInResponseDto>> FaceCheckIn(
+            [FromForm] FaceCheckInForm form)
         {
             try
             {
-                var command = new CheckOutCommand
+                if (form.File == null || form.File.Length == 0)
                 {
-                    EmployeeId = request.EmployeeId,
-                    DeviceId = request.DeviceId,
-                    CheckOutTime = request.CheckInTime // Reuse CheckInTime field for CheckOutTime
+                    return BadRequest(new { message = "Vui lòng chọn một file ảnh" });
+                }
+
+                // Chuyển file sang Base64
+                using var ms = new MemoryStream();
+                await form.File.CopyToAsync(ms);
+                var imageBase64 = Convert.ToBase64String(ms.ToArray());
+
+                var command = new FaceCheckInCommand
+                {
+                    DeviceId = form.DeviceId ?? "Manual-Upload",
+                    ImageBase64 = imageBase64,
+                    CapturedAt = DateTime.UtcNow
                 };
 
                 var result = await _mediator.Send(command);
                 return Ok(result);
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during check-out for employee: {EmployeeId}", request.EmployeeId);
-                return StatusCode(500, new CheckInResponseDto
+                _logger.LogError(ex, "Error during manual face check-in");
+                return Ok(new FaceCheckInResponseDto
                 {
                     Success = false,
-                    Message = "Đã xảy ra lỗi khi check-out"
+                    Message = "Đã xảy ra lỗi khi xử lý check-in",
+                    Status = "Error"
                 });
             }
-        }
-
-        /// <summary>
-        /// Lấy thông tin attendance hôm nay của employee
-        /// GET /api/attendance/today/{employeeId}
-        /// </summary>
-        [HttpGet("today/{employeeId}")]
-        [Authorize]
-        public async Task<ActionResult> GetTodayAttendance(Guid employeeId)
-        {
-            // TODO: Implement query
-            return Ok(new { message = "Feature coming soon" });
-        }
-
-        /// <summary>
-        /// Lấy lịch sử attendance records
-        /// GET /api/attendance/records
-        /// </summary>
-        [HttpGet("records")]
-        [Authorize]
-        public async Task<ActionResult> GetAttendanceRecords(
-            [FromQuery] Guid? employeeId = null,
-            [FromQuery] DateTime? fromDate = null,
-            [FromQuery] DateTime? toDate = null)
-        {
-            // TODO: Implement query
-            return Ok(new { message = "Feature coming soon" });
         }
     }
 }

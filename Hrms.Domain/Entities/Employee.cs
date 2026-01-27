@@ -40,7 +40,7 @@ namespace Hrms.Domain.Entities
         /// <summary>
         /// ID phòng ban
         /// </summary>
-        public Guid? DepartmentId { get; set; }
+        public int? DepartmentId { get; set; }
         public Department? Department { get; set; }
 
         /// <summary>

@@ -21,7 +21,7 @@ namespace Hrms.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<Management>> GetByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Management>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .Where(m => m.DepartmentId == departmentId)
@@ -30,7 +30,7 @@ namespace Hrms.Infrastructure.Repositories
 
         public async Task<Management?> GetActiveAssignmentAsync(
             Guid userId, 
-            Guid departmentId, 
+            int departmentId, 
             DateTime date, 
             CancellationToken cancellationToken = default)
         {

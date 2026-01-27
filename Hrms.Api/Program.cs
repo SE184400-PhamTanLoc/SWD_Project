@@ -1,4 +1,6 @@
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -43,6 +45,9 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    // Hỗ trợ debug lỗi JWT
+    options.IncludeErrorDetails = true;
+    
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -52,9 +57,17 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = issuer,
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero // Không cho phép sai lệch thời gian
+        ClockSkew = TimeSpan.FromMinutes(5), // Cho phép sai lệch thời gian 5 phút
+        RoleClaimType = ClaimTypes.Role,     // Đảm bảo mapping Role đúng
+        NameClaimType = ClaimTypes.Name      // Đảm bảo mapping Name đúng
     };
 });
+
+// Cho phép hiển thị lỗi chi tiết của JWT trong môi trường Dev
+if (builder.Environment.IsDevelopment())
+{
+    Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+}
 
 builder.Services.AddAuthorization();
 

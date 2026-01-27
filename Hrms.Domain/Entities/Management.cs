@@ -17,7 +17,7 @@ namespace Hrms.Domain.Entities
         /// <summary>
         /// ID department được quản lý
         /// </summary>
-        public Guid DepartmentId { get; set; }
+        public int DepartmentId { get; set; }
         public Department Department { get; set; } = null!;
 
         /// <summary>

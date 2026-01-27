@@ -10,7 +10,7 @@ namespace Hrms.Application.Interface
         /// <summary>
         /// Lấy logs theo DeviceId
         /// </summary>
-        Task<IEnumerable<AttendanceDeviceLog>> GetByDeviceIdAsync(Guid deviceId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<AttendanceDeviceLog>> GetByDeviceIdAsync(int deviceId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy logs theo EmployeeId

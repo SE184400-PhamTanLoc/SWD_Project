@@ -22,7 +22,7 @@ namespace Hrms.Domain.Entities
         /// Embedding vector từ AI model (face recognition) - EmbeddingVector trong ERD
         /// </summary>
         public byte[] EmbeddingVector { get; set; } = null!;
-
+ 
         /// <summary>
         /// Điểm chất lượng của ảnh (0-1)
         /// </summary>

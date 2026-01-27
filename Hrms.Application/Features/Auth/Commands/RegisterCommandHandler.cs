@@ -47,7 +47,7 @@ namespace Hrms.Application.Features.Auth.Commands
                 };
             }
 
-            // 2. Kiểm tra role tồn tại và active
+            // 2. Kiểm tra role tồn tại
             var role = await _roleRepository.GetByIdAsync(request.RoleId, cancellationToken);
             if (role == null)
             {
@@ -55,15 +55,6 @@ namespace Hrms.Application.Features.Auth.Commands
                 {
                     Success = false,
                     Message = "Role không tồn tại."
-                };
-            }
-
-            if (!role.IsActive)
-            {
-                return new RegisterResponseDto
-                {
-                    Success = false,
-                    Message = "Role không được kích hoạt."
                 };
             }
 

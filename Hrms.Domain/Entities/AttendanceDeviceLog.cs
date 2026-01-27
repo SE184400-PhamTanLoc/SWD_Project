@@ -11,7 +11,7 @@ namespace Hrms.Domain.Entities
         /// <summary>
         /// ID thiết bị IoT
         /// </summary>
-        public Guid DeviceId { get; set; }
+        public int? DeviceId { get; set; }
         public IoTDevice Device { get; set; } = null!;
 
         /// <summary>

@@ -44,6 +44,10 @@ namespace Hrms.Infrastructure.DependencyInjection
             services.AddScoped<ISystemLogRepository, SystemLogRepository>();
             services.AddScoped<IAttendanceDeviceLogRepository, AttendanceDeviceLogRepository>();
 
+            // ========== SERVICES ==========
+            // Đăng ký PythonAIService
+            services.AddScoped<IPythonAIService, Services.PythonAIService>();
+
             return services;
         }
     }

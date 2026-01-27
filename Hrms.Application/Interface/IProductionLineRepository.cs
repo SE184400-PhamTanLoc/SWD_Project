@@ -10,7 +10,7 @@ namespace Hrms.Application.Interface
         /// <summary>
         /// Lấy production lines theo DepartmentId
         /// </summary>
-        Task<IEnumerable<ProductionLine>> GetByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<ProductionLine>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy production lines active

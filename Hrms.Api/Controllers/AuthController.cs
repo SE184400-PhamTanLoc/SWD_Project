@@ -87,57 +87,5 @@ namespace Hrms.Api.Controllers
                 return StatusCode(500, new { message = "Đã xảy ra lỗi khi đăng nhập" });
             }
         }
-
-        /// <summary>
-        /// Đăng xuất (có thể implement logout logic nếu cần)
-        /// POST /api/auth/logout
-        /// </summary>
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<ActionResult> Logout()
-        {
-            // TODO: Có thể implement blacklist token nếu cần
-            return Ok(new { message = "Đăng xuất thành công" });
-        }
-
-        /// <summary>
-        /// Lấy danh sách tất cả roles (để hiển thị trong form đăng ký)
-        /// GET /api/auth/roles
-        /// </summary>
-        [HttpGet("roles")]
-        [AllowAnonymous]
-        public async Task<ActionResult<List<RoleDto>>> GetAllRoles()
-        {
-            try
-            {
-                var query = new GetAllRolesQuery();
-                var result = await _mediator.Send(query);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting roles");
-                return StatusCode(500, new { message = "Đã xảy ra lỗi khi lấy danh sách roles" });
-            }
-        }
-
-        /// <summary>
-        /// Lấy thông tin user hiện tại
-        /// GET /api/auth/me
-        /// </summary>
-        [HttpGet("me")]
-        [Authorize]
-        public ActionResult GetCurrentUser()
-        {
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-            var roles = User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(c => c.Value).ToList();
-            return Ok(new
-            {
-                UserId = userId,
-                Username = username,
-                Roles = roles
-            });
-        }
     }
 }

@@ -10,7 +10,7 @@ namespace Hrms.Application.Interface
         /// <summary>
         /// Lấy entity theo ID
         /// </summary>
-        Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<T?> GetByIdAsync(object id, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy tất cả entities

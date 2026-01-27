@@ -15,7 +15,7 @@ namespace Hrms.Application.Interface
         /// <summary>
         /// Lấy employees theo DepartmentId
         /// </summary>
-        Task<IEnumerable<Employee>> GetByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Employee>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy employees active

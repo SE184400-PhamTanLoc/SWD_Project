@@ -9,6 +9,6 @@ namespace Hrms.Application.Features.Employees.Queries
     public class GetAllEmployeesQuery : IRequest<List<EmployeeDTO>>
     {
         public bool? IsActive { get; set; }
-        public Guid? DepartmentId { get; set; }
+        public int? DepartmentId { get; set; }
     }
 }

@@ -15,14 +15,14 @@ namespace Hrms.Application.Interface
         /// <summary>
         /// Lấy management assignments của department
         /// </summary>
-        Task<IEnumerable<Management>> GetByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Management>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy management assignment active trong khoảng thời gian
         /// </summary>
         Task<Management?> GetActiveAssignmentAsync(
             Guid userId, 
-            Guid departmentId, 
+            int departmentId, 
             DateTime date, 
             CancellationToken cancellationToken = default);
     }

@@ -14,7 +14,7 @@ namespace Hrms.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<IoTDevice>> GetByLineIdAsync(Guid lineId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<IoTDevice>> GetByLineIdAsync(int lineId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .Where(d => d.LineId == lineId)
@@ -28,7 +28,7 @@ namespace Hrms.Infrastructure.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task UpdateHeartbeatAsync(Guid deviceId, CancellationToken cancellationToken = default)
+        public async Task UpdateHeartbeatAsync(int deviceId, CancellationToken cancellationToken = default)
         {
             var device = await _dbSet.FindAsync(new object[] { deviceId }, cancellationToken);
             if (device != null)

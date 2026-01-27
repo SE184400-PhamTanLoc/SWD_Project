@@ -6,7 +6,7 @@ namespace Hrms.Domain.Entities
     /// </summary>
     public class IoTDevice
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Tên thiết bị
@@ -21,7 +21,7 @@ namespace Hrms.Domain.Entities
         /// <summary>
         /// ID Production Line mà thiết bị được gán (LineId trong ERD)
         /// </summary>
-        public Guid? LineId { get; set; }
+        public int? LineId { get; set; }
         public ProductionLine? ProductionLine { get; set; }
 
         /// <summary>

@@ -182,10 +182,6 @@ namespace Hrms.Infrastructure.Data
                 .IsUnique();
 
             modelBuilder.Entity<Role>()
-                .HasIndex(r => r.RoleCode)
-                .IsUnique();
-
-            modelBuilder.Entity<Role>()
                 .HasIndex(r => r.RoleName)
                 .IsUnique();
 

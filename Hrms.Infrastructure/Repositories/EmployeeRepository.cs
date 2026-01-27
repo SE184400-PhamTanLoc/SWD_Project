@@ -19,7 +19,7 @@ namespace Hrms.Infrastructure.Repositories
             return await _dbSet.FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode, cancellationToken);
         }
 
-        public async Task<IEnumerable<Employee>> GetByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Employee>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .Where(e => e.DepartmentId == departmentId)

@@ -9,7 +9,7 @@ namespace Hrms.Application.Features.IoTDevices.Commands
     /// <summary>
     /// Handler đăng ký IoT Device
     /// </summary>
-    public class RegisterDeviceCommandHandler : IRequestHandler<RegisterDeviceCommand, Guid>
+    public class RegisterDeviceCommandHandler : IRequestHandler<RegisterDeviceCommand, int>
     {
         private readonly IIoTDeviceRepository _deviceRepository;
         private readonly IProductionLineRepository _productionLineRepository;
@@ -25,7 +25,7 @@ namespace Hrms.Application.Features.IoTDevices.Commands
             _logger = logger;
         }
 
-        public async Task<Guid> Handle(RegisterDeviceCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(RegisterDeviceCommand request, CancellationToken cancellationToken)
         {
             // Kiểm tra LineId tồn tại nếu có
             if (request.LineId.HasValue)
@@ -39,7 +39,6 @@ namespace Hrms.Application.Features.IoTDevices.Commands
 
             var device = new IoTDevice
             {
-                Id = Guid.NewGuid(),
                 DeviceName = request.DeviceName,
                 DeviceType = request.DeviceType,
                 LineId = request.LineId,

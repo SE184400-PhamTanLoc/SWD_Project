@@ -16,6 +16,11 @@ namespace Hrms.Api.Controllers
     [Authorize]
     public class EmployeesController : ControllerBase
     {
+        public class EnrollFaceForm
+        {
+            public IFormFile File { get; set; } = null!;
+        }
+
         private readonly IMediator _mediator;
         private readonly ILogger<EmployeesController> _logger;
 
@@ -32,7 +37,7 @@ namespace Hrms.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<EmployeeDTO>>> GetAllEmployees(
             [FromQuery] bool? isActive = null,
-            [FromQuery] Guid? departmentId = null)
+            [FromQuery] int? departmentId = null)
         {
             var query = new GetAllEmployeesQuery
             {
@@ -64,28 +69,61 @@ namespace Hrms.Api.Controllers
         }
 
         /// <summary>
-        /// Upload face template cho employee
-        /// POST /api/employees/{id}/face-template
+        /// Enroll (đăng ký) khuôn mặt nhân viên vào Python AI Service
+        /// POST /api/employees/{id}/enroll-face
         /// </summary>
-        [HttpPost("{id}/face-template")]
+        [HttpPost("{id}/enroll-face")]
         [Authorize(Roles = "Admin,HR")]
-        public async Task<ActionResult> UploadFaceTemplate(Guid id, [FromBody] UploadFaceTemplateCommand command)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<EnrollEmployeeFaceResponseDto>> EnrollFace(
+            Guid id, 
+            [FromForm] EnrollFaceForm form)
         {
             try
             {
-                command.EmployeeId = id;
+                if (form.File == null || form.File.Length == 0)
+                {
+                    return BadRequest(new { message = "Vui lòng chọn một file ảnh" });
+                }
+
+                // Chuyển file stream sang Base64 để gửi vào Command (hoặc pass stream)
+                using var ms = new MemoryStream();
+                await form.File.CopyToAsync(ms);
+                var fileBytes = ms.ToArray();
+                var imageBase64 = Convert.ToBase64String(fileBytes);
+
+                var command = new EnrollEmployeeFaceCommand
+                {
+                    EmployeeId = id,
+                    ImageBase64 = imageBase64
+                };
+
                 var result = await _mediator.Send(command);
-                return Ok(new { message = "Face template uploaded successfully", success = result });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
+                
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error uploading face template for employee: {EmployeeId}", id);
-                return StatusCode(500, new { message = "Đã xảy ra lỗi khi upload face template" });
+                _logger.LogError(ex, "Error enrolling face for employee: {EmployeeId}", id);
+                return StatusCode(500, new EnrollEmployeeFaceResponseDto
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi đăng ký khuôn mặt"
+                });
             }
         }
+    }
+
+    /// <summary>
+    /// Request DTO cho enroll face
+    /// </summary>
+    public class EnrollFaceRequestDto
+    {
+        public string ImageBase64 { get; set; } = string.Empty;
     }
 }

@@ -15,7 +15,7 @@ namespace Hrms.Application.Features.Auth.Queries
     /// </summary>
     public class RoleDto
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string RoleCode { get; set; } = null!;
         public string RoleName { get; set; } = null!;
         public string? Description { get; set; }

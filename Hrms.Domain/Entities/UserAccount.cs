@@ -21,7 +21,7 @@ namespace Hrms.Domain.Entities
         /// <summary>
         /// ID role (FK to Role) - Theo ERD: Users có RoleId (one-to-many với Role)
         /// </summary>
-        public Guid RoleId { get; set; }
+        public int RoleId { get; set; }
         public Role Role { get; set; } = null!;
 
         /// <summary>

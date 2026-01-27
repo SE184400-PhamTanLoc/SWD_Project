@@ -14,7 +14,7 @@ namespace Hrms.Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<ProductionLine>> GetByDepartmentIdAsync(Guid departmentId, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ProductionLine>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
                 .Where(pl => pl.DepartmentId == departmentId)

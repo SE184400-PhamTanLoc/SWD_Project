@@ -6,7 +6,7 @@ namespace Hrms.Domain.Entities
     /// </summary>
     public class ProductionLine
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Tên dây chuyền sản xuất
@@ -16,7 +16,7 @@ namespace Hrms.Domain.Entities
         /// <summary>
         /// ID phòng ban chứa dây chuyền này
         /// </summary>
-        public Guid DepartmentId { get; set; }
+        public int DepartmentId { get; set; }
         public Department Department { get; set; } = null!;
 
         /// <summary>

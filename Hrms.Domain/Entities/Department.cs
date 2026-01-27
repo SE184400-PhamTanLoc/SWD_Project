@@ -6,7 +6,7 @@ namespace Hrms.Domain.Entities
     /// </summary>
     public class Department
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Mã phòng ban (unique)

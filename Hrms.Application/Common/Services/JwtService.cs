@@ -51,7 +51,7 @@ namespace Hrms.Application.Common.Services
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(claims),
+                Subject = new ClaimsIdentity(claims, "Bearer", ClaimTypes.Name, ClaimTypes.Role),
                 Expires = DateTime.UtcNow.AddMinutes(_expirationMinutes),
                 Issuer = _issuer,
                 Audience = _audience,
