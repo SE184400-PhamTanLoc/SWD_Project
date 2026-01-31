@@ -48,7 +48,18 @@ namespace Hrms.Api.Controllers
             var result = await _mediator.Send(query);
             return Ok(result);
         }
-
+        /// <summary>
+        /// Lấy employee theo id
+        /// GET /api/employees/{id}
+        /// </summary>
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<EmployeeDTO>> GetEmployeeById(Guid id)
+        {
+            var result = await _mediator.Send(new GetEmployeeByIdQuery { Id = id });
+            if (result == null)
+                return NotFound(new { message = $"Không tìm thấy employee với Id = {id}" });
+            return Ok(result);
+        }
         /// <summary>
         /// Tạo mới employee
         /// POST /api/employees
@@ -61,6 +72,54 @@ namespace Hrms.Api.Controllers
             {
                 var result = await _mediator.Send(command);
                 return CreatedAtAction(nameof(GetAllEmployees), new { id = result.Id }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Cập nhật employee
+        /// PUT /api/employees/{id}
+        /// </summary>
+        [HttpPut("{id:guid}")]
+        [Authorize(Roles = "Admin,HR")]
+        public async Task<ActionResult<EmployeeDTO>> UpdateEmployee(
+            Guid id,
+            [FromBody] UpdateEmployeeCommand command)
+        {
+            command.SetId(id);
+            try
+            {
+                var result = await _mediator.Send(command);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Xóa employee
+        /// DELETE /api/employees/{id}
+        /// </summary>
+        [HttpDelete("{id:guid}")]
+        [Authorize(Roles = "Admin,HR")]
+        public async Task<ActionResult> DeleteEmployee(Guid id)
+        {
+            try
+            {
+                await _mediator.Send(new DeleteEmployeeCommand { Id = id });
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {

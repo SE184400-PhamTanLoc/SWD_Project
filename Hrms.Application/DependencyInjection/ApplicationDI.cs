@@ -31,6 +31,9 @@ namespace Hrms.Application.DependencyInjection
             // Đăng ký FluentValidation (cần FluentValidation.DependencyInjectionExtensions)
             services.AddValidatorsFromAssembly(applicationAssembly!);
 
+            // ========== AUTOMAPPER ==========
+            services.AddAutoMapper(applicationAssembly);
+
             // ========== APPLICATION SERVICES ==========
             // Đăng ký JWT Service
             services.AddScoped<Common.Services.IJwtService, Common.Services.JwtService>();
