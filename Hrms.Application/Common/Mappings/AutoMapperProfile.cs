@@ -1,23 +1,31 @@
-﻿using AutoMapper;
+using AutoMapper;
+using Hrms.Application.DTOs;
+using Hrms.Application.Features.Employees.Commands;
+using Hrms.Domain.Entities;
 
-
-/// <summary>
-/// AutoMapper profile for mapping between domain entities and DTOs.
-/// </summary>
 namespace Hrms.Application.Common.Mappings
 {
     /// <summary>
-    /// Configuration profile for AutoMapper.
-    ///     </summary>
+    /// Cấu hình AutoMapper: Entity ↔ DTO, Command → Entity
+    /// </summary>
     public class AutoMapperProfile : Profile
     {
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoMapperProfile"/> class.
-        ///     </summary>
         public AutoMapperProfile()
         {
+            // Employee
+            CreateMap<Employee, EmployeeDTO>();
+            CreateMap<UpdateEmployeeCommand, Employee>()
+                .ForMember(e => e.CreatedAt, opt => opt.Ignore())
+                .ForMember(e => e.UpdatedAt, opt => opt.Ignore())
+                .ForMember(e => e.IdentityNumber, opt => opt.Ignore())
+                .ForMember(e => e.Department, opt => opt.Ignore())
+                .ForMember(e => e.ShiftAssignments, opt => opt.Ignore())
+                .ForMember(e => e.AttendanceRecords, opt => opt.Ignore())
+                .ForMember(e => e.AttendanceSummaries, opt => opt.Ignore())
+                .ForMember(e => e.FaceTemplate, opt => opt.Ignore());
 
+            // Department
+            CreateMap<Department, DepartmentDTO>();
         }
     }
 }
