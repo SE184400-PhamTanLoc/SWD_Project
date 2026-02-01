@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hrms.Application.Features.Shifts.Commands;
+using Hrms.Application.Features.Shifts.Queries;
 
 namespace Hrms.Api.Controllers
 {
@@ -66,14 +67,81 @@ namespace Hrms.Api.Controllers
         }
 
         /// <summary>
+        /// Cập nhật shift
+        /// PUT /api/shifts/{id}
+        /// </summary>
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,HR")]
+        public async Task<ActionResult> UpdateShift(Guid id, [FromBody] UpdateShiftCommand command)
+        {
+            if (id != command.Id)
+            {
+                return BadRequest(new { message = "ID mismatch" });
+            }
+
+            try
+            {
+                await _mediator.Send(command);
+                return Ok(new { message = "Shift updated successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Xóa shift
+        /// DELETE /api/shifts/{id}
+        /// </summary>
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,HR")]
+        public async Task<ActionResult> DeleteShift(Guid id)
+        {
+            try
+            {
+                await _mediator.Send(new DeleteShiftCommand(id));
+                return Ok(new { message = "Shift deleted successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
+        /// <summary>
         /// Lấy danh sách shifts
         /// GET /api/shifts
         /// </summary>
         [HttpGet]
         public async Task<ActionResult> GetShifts()
         {
-            // TODO: Implement query
-            return Ok(new { message = "Feature coming soon" });
+            var shifts = await _mediator.Send(new GetAllShiftsQuery());
+            return Ok(shifts);
+        }
+
+        /// <summary>
+        /// Lấy shift theo id
+        /// GET /api/shifts/{id}
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<ActionResult> GetShiftById(Guid id)
+        {
+            var shift = await _mediator.Send(new GetShiftByIdQuery(id));
+            if (shift == null)
+            {
+                return NotFound(new { message = $"Shift with id {id} not found" });
+            }
+            return Ok(shift);
         }
     }
 }

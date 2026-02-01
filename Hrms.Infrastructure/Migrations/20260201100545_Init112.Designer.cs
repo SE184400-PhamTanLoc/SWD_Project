@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hrms.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260127170846_ChangeRoleIdToInteger")]
-    partial class ChangeRoleIdToInteger
+    [Migration("20260201100545_Init112")]
+    partial class Init112
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,8 +41,8 @@ namespace Hrms.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("DeviceId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("DeviceId")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
@@ -164,9 +164,11 @@ namespace Hrms.Infrastructure.Migrations
 
             modelBuilder.Entity("Hrms.Domain.Entities.Department", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("DepartmentCode")
                         .IsRequired()
@@ -199,8 +201,8 @@ namespace Hrms.Infrastructure.Migrations
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -269,9 +271,11 @@ namespace Hrms.Infrastructure.Migrations
 
             modelBuilder.Entity("Hrms.Domain.Entities.IoTDevice", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("DeviceName")
                         .IsRequired()
@@ -287,8 +291,8 @@ namespace Hrms.Infrastructure.Migrations
                     b.Property<DateTime?>("LastHeartbeat")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("LineId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("LineId")
+                        .HasColumnType("int");
 
                     b.Property<string>("LocationDesc")
                         .HasColumnType("nvarchar(max)");
@@ -319,8 +323,8 @@ namespace Hrms.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("FromDate")
                         .HasColumnType("datetime2");
@@ -358,15 +362,17 @@ namespace Hrms.Infrastructure.Migrations
 
             modelBuilder.Entity("Hrms.Domain.Entities.ProductionLine", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("Capacity")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("LineName")
                         .IsRequired()
@@ -595,8 +601,7 @@ namespace Hrms.Infrastructure.Migrations
                     b.HasOne("Hrms.Domain.Entities.IoTDevice", "Device")
                         .WithMany("DeviceLogs")
                         .HasForeignKey("DeviceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Hrms.Domain.Entities.Employee", "Employee")
                         .WithMany()

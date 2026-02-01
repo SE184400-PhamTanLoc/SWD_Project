@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Employees\Command\" />
-    <Folder Include="Employees\Query\" />
+    <Compile Remove="Employees\**" />
+    <EmbeddedResource Remove="Employees\**" />
+    <None Remove="Employees\**" />
   </ItemGroup>
 
   <ItemGroup>

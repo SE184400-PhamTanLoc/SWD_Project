@@ -9,9 +9,9 @@ namespace Hrms.Application.Features.Shifts.Commands
     {
         public string ShiftCode { get; set; } = null!;
         public string Name { get; set; } = null!;
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
-        public TimeSpan? BreakDuration { get; set; }
+        public string StartTime { get; set; } = null!;     
+        public string EndTime { get; set; } = null!;       
+        public string? BreakDuration { get; set; }
         public int AllowedLateMinutes { get; set; } = 15;
         public int AllowedEarlyLeaveMinutes { get; set; } = 15;
     }
