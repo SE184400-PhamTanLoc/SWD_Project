@@ -46,7 +46,7 @@ namespace Hrms.Application.Common.Services
             // Thêm roles (theo ERD: một user chỉ có một role)
             foreach (var role in roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimTypes.Role, user.Role.RoleCode));
             }
 
             var tokenDescriptor = new SecurityTokenDescriptor
