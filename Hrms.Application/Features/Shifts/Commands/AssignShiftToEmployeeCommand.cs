@@ -11,5 +11,6 @@ namespace Hrms.Application.Features.Shifts.Commands
         public Guid ShiftId { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
+        public int? ProductionLineId { get; set; }
     }
 }

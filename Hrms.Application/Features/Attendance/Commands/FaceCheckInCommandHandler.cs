@@ -145,6 +145,36 @@ namespace Hrms.Application.Features.Attendance.Commands
 
                 // 7. Kiểm tra đã check-in hôm nay chưa
                 var today = DateTime.Today;
+                
+                // Lấy ShiftAssignment để kiểm tra Location (ProductionLine) + Shift info
+                var shiftAssignment = await _shiftAssignmentRepository.GetCurrentShiftAssignmentAsync(
+                    employee.Id, today, cancellationToken);
+
+                // --- LOGIC KIỂM TRA LOCATION ---
+                // Nếu ShiftAssignment có gán ProductionLine, check xem Device có thuộc Line đó không
+                if (shiftAssignment?.ProductionLineId.HasValue == true)
+                {
+                    if (device != null && device.LineId != shiftAssignment.ProductionLineId)
+                    {
+                        deviceLog.ProcessingResult = "WrongLocation";
+                        deviceLog.ErrorMessage = $"Wrong Location. Assigned: {shiftAssignment.ProductionLine?.LineName}, Device at: {device.ProductionLine?.LineName ?? "Unknown"}";
+                        await _deviceLogRepository.AddAsync(deviceLog, cancellationToken);
+                        await _deviceLogRepository.SaveChangesAsync(cancellationToken);
+
+                        _logger.LogWarning("Employee {EmployeeCode} check-in at wrong location. Assigned: {Assigned}, Device: {DeviceLine}",
+                            employee.EmployeeCode, shiftAssignment.ProductionLine?.LineName, device.ProductionLine?.LineName);
+
+                        return new FaceCheckInResponseDto
+                        {
+                            Success = false,
+                            Message = $"Sai địa điểm! Bạn được phân công tại: {shiftAssignment.ProductionLine?.LineName}",
+                            Status = "WrongLocation",
+                            Confidence = recognizeResult.Confidence
+                        };
+                    }
+                }
+                // -------------------------------
+
                 var existingRecord = await _attendanceRecordRepository.GetByEmployeeAndDateAsync(employee.Id, today, cancellationToken);
 
                 if (existingRecord != null)
@@ -178,10 +208,7 @@ namespace Hrms.Application.Features.Attendance.Commands
                             existingRecord.TotalHours = totalMinutes / 60.0;
                         }
 
-                        // Kiểm tra early leave nếu có shift
-                        var shiftAssignment = await _shiftAssignmentRepository.GetCurrentShiftAssignmentAsync(
-                            employee.Id, today, cancellationToken);
-                        
+                        // Kiểm tra early leave nếu có shift (đã lấy ở trên)
                         if (shiftAssignment?.Shift != null)
                         {
                             var expectedEndTime = today.Add(shiftAssignment.Shift.EndTime);
@@ -215,8 +242,7 @@ namespace Hrms.Application.Features.Attendance.Commands
                 }
 
                 // 8. Chưa check-in, tạo attendance record mới
-                var shiftToday = await _shiftAssignmentRepository.GetCurrentShiftAssignmentAsync(
-                    employee.Id, today, cancellationToken);
+                // (shiftAssignment đã lấy ở trên)
 
                 var newRecord = new AttendanceRecord
                 {
@@ -224,15 +250,15 @@ namespace Hrms.Application.Features.Attendance.Commands
                     EmployeeId = employee.Id,
                     WorkDate = today,
                     CheckInTime = request.CapturedAt,
-                    ShiftId = shiftToday?.ShiftId,
+                    ShiftId = shiftAssignment?.ShiftId,
                     Status = AttendanceStatus.OnTime,
                     Source = Hrms.Domain.Enums.AttendanceSource.FaceRecognition
                 };
 
                 // Tính late minutes và set status nếu có shift
-                if (shiftToday?.Shift != null)
+                if (shiftAssignment?.Shift != null)
                 {
-                    var expectedStartTime = today.Add(shiftToday.Shift.StartTime);
+                    var expectedStartTime = today.Add(shiftAssignment.Shift.StartTime);
                     if (newRecord.CheckInTime > expectedStartTime)
                     {
                         // Đi muộn
