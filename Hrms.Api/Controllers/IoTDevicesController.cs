@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Hrms.Application.Features.IoTDevices.Commands;
+using Hrms.Application.Features.IoTDevices.Queries;
 
 namespace Hrms.Api.Controllers
 {
@@ -70,8 +71,9 @@ namespace Hrms.Api.Controllers
         [Authorize]
         public async Task<ActionResult> GetDevices()
         {
-            // TODO: Implement query
-            return Ok(new { message = "Feature coming soon" });
+            var query = new GetIoTDevicesQuery();
+            var devices = await _mediator.Send(query);
+            return Ok(devices);
         }
     }
 }

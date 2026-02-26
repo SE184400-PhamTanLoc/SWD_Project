@@ -147,6 +147,32 @@ namespace Hrms.Infrastructure.Services
             }
         }
 
+        public async Task<PythonGetImagesResponseDto> GetEnrolledImagesAsync(string personId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient("PythonAIService");
+                var response = await httpClient.GetAsync($"/api/get_images/{personId}", cancellationToken);
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("Python AI get_images failed with status {StatusCode}: {Response}", response.StatusCode, responseContent);
+                    return new PythonGetImagesResponseDto { Ok = false };
+                }
+
+                var result = JsonSerializer.Deserialize<PythonGetImagesResponseDto>(responseContent, 
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return result ?? new PythonGetImagesResponseDto { Ok = false };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error calling Python AI get_images API");
+                return new PythonGetImagesResponseDto { Ok = false };
+            }
+        }
+
         /// <summary>
         /// Convert base64 string to byte array
         /// Handles both with and without "data:image/jpeg;base64," prefix

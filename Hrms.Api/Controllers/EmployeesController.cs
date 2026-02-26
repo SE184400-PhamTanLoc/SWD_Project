@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Hrms.Application.DTOs;
 using Hrms.Application.Features.Employees.Commands;
 using Hrms.Application.Features.Employees.Queries;
+using Hrms.Application.DTOs.PythonAI;
+using Hrms.Application.DTOs.Employee;
 
 namespace Hrms.Api.Controllers
 {
@@ -175,6 +177,18 @@ namespace Hrms.Api.Controllers
                     Message = "Đã xảy ra lỗi khi đăng ký khuôn mặt"
                 });
             }
+        }
+
+        /// <summary>
+        /// Lấy danh sách ảnh đã enroll của nhân viên
+        /// GET /api/employees/{id}/images
+        /// </summary>
+        [HttpGet("{id}/images")]
+        public async Task<ActionResult<PythonGetImagesResponseDto>> GetEnrolledImages(Guid id)
+        {
+            var query = new GetEnrolledImagesQuery { EmployeeId = id };
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
     }
 

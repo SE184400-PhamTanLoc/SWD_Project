@@ -1,46 +1,30 @@
 using MediatR;
-using Microsoft.Extensions.Logging;
-using Hrms.Application.Features.IoTDevices.Commands;
 using Hrms.Application.Interface;
+using Hrms.Domain.Entities;
 
 namespace Hrms.Application.Features.IoTDevices.Commands
 {
-    /// <summary>
-    /// Handler cập nhật heartbeat
-    /// </summary>
     public class UpdateDeviceHeartbeatCommandHandler : IRequestHandler<UpdateDeviceHeartbeatCommand, bool>
     {
-        private readonly IIoTDeviceRepository _deviceRepository;
-        private readonly ILogger<UpdateDeviceHeartbeatCommandHandler> _logger;
+        private readonly IIoTDeviceRepository _repository;
 
-        public UpdateDeviceHeartbeatCommandHandler(
-            IIoTDeviceRepository deviceRepository,
-            ILogger<UpdateDeviceHeartbeatCommandHandler> logger)
+        public UpdateDeviceHeartbeatCommandHandler(IIoTDeviceRepository repository)
         {
-            _deviceRepository = deviceRepository;
-            _logger = logger;
+            _repository = repository;
         }
 
         public async Task<bool> Handle(UpdateDeviceHeartbeatCommand request, CancellationToken cancellationToken)
         {
-            if (!int.TryParse(request.DeviceId, out var deviceIdInt))
+            // Tìm device theo Id (trong Command này ta dùng int Id mapping từ DeviceId string if needed)
+            // Lưu ý: Trong Entity IoTDevice, PK là Id (int).
+            if (int.TryParse(request.DeviceId, out int id))
             {
-                _logger.LogWarning("Invalid device ID format: {DeviceId}", request.DeviceId);
-                return false;
+                await _repository.UpdateHeartbeatAsync(id, cancellationToken);
+                await _repository.SaveChangesAsync(cancellationToken);
+                return true;
             }
- 
-            var device = await _deviceRepository.GetByIdAsync(deviceIdInt, cancellationToken);
- 
-            if (device == null)
-            {
-                _logger.LogWarning("Device not found for heartbeat: {DeviceId}", request.DeviceId);
-                return false;
-            }
- 
-            await _deviceRepository.UpdateHeartbeatAsync(deviceIdInt, cancellationToken);
-            await _deviceRepository.SaveChangesAsync(cancellationToken);
-
-            return true;
+            
+            return false;
         }
     }
 }
