@@ -83,7 +83,7 @@ namespace Hrms.Application.Features.FaceRecognition.Commands
             {
                 Id = Guid.NewGuid(),
                 DeviceId = device.Id,
-                DeviceCode = device.Id.ToString(), // Dùng Id làm DeviceCode
+                DeviceCode = device.Id.ToString(), 
                 CapturedAt = request.CapturedAt,
                 ProcessingResult = "Processing"
             };

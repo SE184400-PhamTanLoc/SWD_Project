@@ -9,6 +9,8 @@
         public Shift Shift { get; set; } = null!;
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
+        public int? ProductionLineId { get; set; }
+        public ProductionLine? ProductionLine { get; set; }
     }
 
 }

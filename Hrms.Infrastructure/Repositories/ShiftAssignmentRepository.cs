@@ -35,6 +35,7 @@ namespace Hrms.Infrastructure.Repositories
         {
             return await _dbSet
                 .Include(sa => sa.Shift)
+                .Include(sa => sa.ProductionLine)
                 .Where(sa => sa.EmployeeId == employeeId
                     && sa.FromDate <= date
                     && sa.ToDate >= date)

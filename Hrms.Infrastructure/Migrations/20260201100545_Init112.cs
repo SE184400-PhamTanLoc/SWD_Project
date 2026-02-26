@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Hrms.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init112 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +15,8 @@ namespace Hrms.Infrastructure.Migrations
                 name: "Departments",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     DepartmentCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -29,8 +30,9 @@ namespace Hrms.Infrastructure.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RoleName = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Permissions = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -83,7 +85,7 @@ namespace Hrms.Infrastructure.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IdentityNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
                     HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -104,9 +106,10 @@ namespace Hrms.Infrastructure.Migrations
                 name: "ProductionLines",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     LineName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: true),
                     MachineCount = table.Column<int>(type: "int", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -129,7 +132,7 @@ namespace Hrms.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<int>(type: "int", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true),
                     LoginAttempts = table.Column<int>(type: "int", nullable: false),
                     IsLocked = table.Column<bool>(type: "bit", nullable: false),
@@ -267,10 +270,11 @@ namespace Hrms.Infrastructure.Migrations
                 name: "IoTDevices",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     DeviceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DeviceType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LineId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LineId = table.Column<int>(type: "int", nullable: true),
                     LocationDesc = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IpAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MacAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -294,7 +298,7 @@ namespace Hrms.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
                     FromDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ToDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -365,7 +369,7 @@ namespace Hrms.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DeviceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DeviceId = table.Column<int>(type: "int", nullable: true),
                     CapturedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DeviceCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RawImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -469,12 +473,6 @@ namespace Hrms.Infrastructure.Migrations
                 name: "IX_ProductionLines_DepartmentId",
                 table: "ProductionLines",
                 column: "DepartmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Roles_RoleCode",
-                table: "Roles",
-                column: "RoleCode",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_RoleName",

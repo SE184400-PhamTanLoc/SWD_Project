@@ -471,6 +471,9 @@ namespace Hrms.Infrastructure.Migrations
                     b.Property<DateTime>("FromDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("ProductionLineId")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("ShiftId")
                         .HasColumnType("uniqueidentifier");
 
@@ -478,6 +481,8 @@ namespace Hrms.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductionLineId");
 
                     b.HasIndex("ShiftId");
 
@@ -730,6 +735,11 @@ namespace Hrms.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Hrms.Domain.Entities.ProductionLine", "ProductionLine")
+                        .WithMany()
+                        .HasForeignKey("ProductionLineId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Hrms.Domain.Entities.Shift", "Shift")
                         .WithMany("ShiftAssignments")
                         .HasForeignKey("ShiftId")
@@ -737,6 +747,8 @@ namespace Hrms.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+
+                    b.Navigation("ProductionLine");
 
                     b.Navigation("Shift");
                 });
