@@ -82,6 +82,12 @@ namespace Hrms.Infrastructure.Data
                 .HasForeignKey(sa => sa.ShiftId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<ShiftAssignment>()
+                .HasOne(sa => sa.ProductionLine)
+                .WithMany()
+                .HasForeignKey(sa => sa.ProductionLineId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Employee - AttendanceRecord (One-to-Many)
             modelBuilder.Entity<AttendanceRecord>()
                 .HasOne(ar => ar.Employee)

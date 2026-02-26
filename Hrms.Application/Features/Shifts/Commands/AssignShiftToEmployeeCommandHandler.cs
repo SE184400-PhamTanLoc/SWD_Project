@@ -67,7 +67,8 @@ namespace Hrms.Application.Features.Shifts.Commands
                 EmployeeId = request.EmployeeId,
                 ShiftId = request.ShiftId,
                 FromDate = request.FromDate,
-                ToDate = request.ToDate
+                ToDate = request.ToDate,
+                ProductionLineId = request.ProductionLineId
             };
 
             await _shiftAssignmentRepository.AddAsync(assignment, cancellationToken);
