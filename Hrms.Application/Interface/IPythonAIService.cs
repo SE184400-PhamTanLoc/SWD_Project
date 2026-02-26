@@ -28,5 +28,11 @@ namespace Hrms.Application.Interface
         /// <param name="imageBase64">Ảnh base64</param>
         /// <returns>Response từ Python AI Service với decision (accept/reject)</returns>
         Task<PythonRecognizeResponseDto> RecognizeFaceAsync(string? deviceId, string imageBase64, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy danh sách ảnh đã enroll từ Python AI Service
+        /// Gọi GET /api/get_images/{personId}
+        /// </summary>
+        Task<PythonGetImagesResponseDto> GetEnrolledImagesAsync(string personId, CancellationToken cancellationToken = default);
     }
 }

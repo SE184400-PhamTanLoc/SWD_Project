@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Hrms.Application.Interface;
 using Hrms.Domain.Entities;
+using Hrms.Application.DTOs.Employee;
 
 namespace Hrms.Application.Features.Employees.Commands
 {
@@ -71,7 +72,7 @@ namespace Hrms.Application.Features.Employees.Commands
             var existingTemplate = await _faceTemplateRepository.GetByEmployeeIdAsync(employee.Id, cancellationToken);
             if (existingTemplate != null)
             {
-                existingTemplate.ImagePath = request.ImageBase64; // Store Base64 in ImagePath as requested
+                existingTemplate.ImagePath = request.ImageBase64; 
                 existingTemplate.RegisteredDate = DateTime.UtcNow;
                 existingTemplate.IsActive = true;
                 existingTemplate.Version++;
@@ -83,7 +84,7 @@ namespace Hrms.Application.Features.Employees.Commands
                 {
                     EmployeeId = employee.Id,
                     ImagePath = request.ImageBase64,
-                    EmbeddingVector = new byte[0], // LBPH doesn't provide vector
+                    EmbeddingVector = new byte[0],
                     RegisteredDate = DateTime.UtcNow,
                     IsActive = true,
                     Version = 1
