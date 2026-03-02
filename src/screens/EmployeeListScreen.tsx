@@ -1,30 +1,35 @@
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import CustomAlert from "../components/CustomAlert";
 import EmployeeCard from "../components/EmployeeCard";
-import { AppStackParamList } from "../navigation/AppNavigator";
 import { employeeService } from "../service/employee.service";
-import { colors } from "../theme/colors";
 import { Employee } from "../types/api.types";
+import { AppStackParamList } from "../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "EmployeeList">;
 
-export default function EmployeeListScreen({ navigation }: Props) {
+export function EmployeeListScreen({ navigation }: Props) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [filterActive, setFilterActive] = useState<boolean | undefined>(
-    undefined,
-  );
+  const [search, setSearch] = useState("");
+  const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
+  const [departmentId, setDepartmentId] = useState("");
 
   const [alert, setAlert] = useState({
     visible: false,
@@ -38,8 +43,10 @@ export default function EmployeeListScreen({ navigation }: Props) {
     try {
       if (showLoader) setLoading(true);
 
-      const params =
-        filterActive !== undefined ? { isActive: filterActive } : undefined;
+      const params: any = {};
+      if (filterActive !== undefined) params.isActive = filterActive;
+      if (departmentId.trim() !== "") params.departmentId = parseInt(departmentId);
+
       const data = await employeeService.getEmployees(params);
 
       setEmployees(data);
@@ -68,129 +75,144 @@ export default function EmployeeListScreen({ navigation }: Props) {
 
   useEffect(() => {
     loadEmployees();
-  }, [filterActive]);
+  }, [filterActive, departmentId]);
 
-  const handleEmployeePress = (employee: Employee) => {
-    setAlert({
-      visible: true,
-      title: employee.fullName,
-      message: `Employee Code: ${employee.employeeCode}\nEmail: ${employee.email || "N/A"}\nPhone: ${employee.phoneNumber || "N/A"}`,
-      type: "info",
-      onConfirm: undefined,
+  const handleEnrollFace = (employee: Employee) => {
+    navigation.navigate("EnrollFace", {
+      employeeId: employee.id,
+      employeeName: employee.fullName,
     });
   };
 
-  const renderFilterButtons = () => (
-    <View style={styles.filterContainer}>
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          filterActive === undefined && styles.filterButtonActive,
-        ]}
-        onPress={() => setFilterActive(undefined)}
-      >
-        <Text
-          style={[
-            styles.filterButtonText,
-            filterActive === undefined && styles.filterButtonTextActive,
-          ]}
-        >
-          All
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          filterActive === true && styles.filterButtonActive,
-        ]}
-        onPress={() => setFilterActive(true)}
-      >
-        <Text
-          style={[
-            styles.filterButtonText,
-            filterActive === true && styles.filterButtonTextActive,
-          ]}
-        >
-          Active
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          filterActive === false && styles.filterButtonActive,
-        ]}
-        onPress={() => setFilterActive(false)}
-      >
-        <Text
-          style={[
-            styles.filterButtonText,
-            filterActive === false && styles.filterButtonTextActive,
-          ]}
-        >
-          Inactive
-        </Text>
-      </TouchableOpacity>
-    </View>
+  const filteredEmployees = employees.filter((emp) =>
+    emp.fullName.toLowerCase().includes(search.toLowerCase()) ||
+    emp.employeeCode.toLowerCase().includes(search.toLowerCase())
   );
-
-  // Loading state
-  if (loading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
-
-  if (employees.length === 0) {
-    return (
-      <View style={styles.container}>
-        {renderFilterButtons()}
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>No employees found</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => loadEmployees()}
-          >
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-
-        <CustomAlert
-          visible={alert.visible}
-          title={alert.title}
-          message={alert.message}
-          type={alert.type}
-          onClose={() => setAlert({ ...alert, visible: false })}
-          onConfirm={alert.onConfirm}
-        />
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
-      {renderFilterButtons()}
+      <StatusBar barStyle="dark-content" />
 
-      <FlatList
-        data={employees}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <EmployeeCard employee={item} onPress={handleEmployeePress} />
-        )}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <Animated.View entering={FadeInUp.duration(600)} style={styles.titleContainer}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Ionicons name="chevron-back" size={28} color="#1A1A1A" />
+            </TouchableOpacity>
+            <Text style={styles.title}>Talent Pool</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => navigation.navigate("AddEmployee")}
+            >
+              <LinearGradient colors={["#00F2FE", "#4FACFE"]} style={styles.addGradient}>
+                <Ionicons name="add" size={26} color="white" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+
+          <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+            <TextInput
+              placeholder="Search by name or code..."
+              placeholderTextColor="#999"
+              style={styles.searchInput}
+              value={search}
+              onChangeText={setSearch}
+            />
+            {search.length > 0 && (
+              <TouchableOpacity onPress={() => setSearch("")}>
+                <Ionicons name="close-circle" size={18} color="#999" />
+              </TouchableOpacity>
+            )}
+          </Animated.View>
+
+          <Animated.View entering={FadeInUp.delay(300).duration(600)} style={styles.filterSection}>
+            <View style={styles.statusFilters}>
+              {["All", "Active", "Inactive"].map((label) => {
+                const val = label === "All" ? undefined : label === "Active";
+                const isActive = filterActive === val;
+                return (
+                  <TouchableOpacity
+                    key={label}
+                    onPress={() => setFilterActive(val)}
+                    style={[styles.filterChip, isActive && styles.filterChipActive]}
+                  >
+                    <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <View style={styles.deptFilterContainer}>
+              <View style={styles.deptInputWrapper}>
+                <Ionicons name="business-outline" size={16} color="#999" style={styles.deptIcon} />
+                <TextInput
+                  placeholder="Dept ID"
+                  placeholderTextColor="#999"
+                  style={styles.deptInput}
+                  value={departmentId}
+                  onChangeText={setDepartmentId}
+                  keyboardType="numeric"
+                />
+              </View>
+              {(filterActive !== undefined || departmentId !== "" || search !== "") && (
+                <TouchableOpacity
+                  style={styles.clearButton}
+                  onPress={() => {
+                    setFilterActive(undefined);
+                    setDepartmentId("");
+                    setSearch("");
+                  }}
+                >
+                  <Ionicons name="refresh-circle" size={24} color="#FF4D4D" />
+                </TouchableOpacity>
+              )}
+            </View>
+          </Animated.View>
+        </View>
+
+        {loading && !refreshing ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#4FACFE" />
+            <Text style={styles.loadingText}>Loading employees...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredEmployees}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item, index }) => (
+              <Animated.View entering={FadeInDown.delay(index * 100).duration(500)}>
+                <EmployeeCard
+                  employee={item}
+                  onPress={(emp) => console.log("Press", emp.fullName)}
+                  onEnrollFace={handleEnrollFace}
+                />
+              </Animated.View>
+            )}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#4FACFE"
+                colors={["#4FACFE"]}
+              />
+            }
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Ionicons name="people-outline" size={80} color="#E0E0E0" />
+                <Text style={styles.emptyText}>No employees found</Text>
+                <TouchableOpacity style={styles.retryButton} onPress={() => loadEmployees()}>
+                  <Text style={styles.retryText}>Refresh List</Text>
+                </TouchableOpacity>
+              </View>
+            }
           />
-        }
-      />
+        )}
+      </SafeAreaView>
 
       <CustomAlert
         visible={alert.visible}
@@ -207,66 +229,161 @@ export default function EmployeeListScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: "#F8F9FA",
   },
-  centerContainer: {
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
+    backgroundColor: "#F8F9FA",
+    zIndex: 10,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  backButton: {
+    padding: 5,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#1A1A1A",
+    letterSpacing: 0.5,
+  },
+  addButton: {
+    elevation: 8,
+    shadowColor: "#4FACFE",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  addGradient: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 18,
+    paddingHorizontal: 15,
+    height: 54,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+    marginBottom: 15,
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    color: "#1A1A1A",
+    fontSize: 16,
+  },
+  filterSection: {
+    gap: 12,
+  },
+  statusFilters: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 10,
+  },
+  deptFilterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  deptInputWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 15,
+    paddingHorizontal: 12,
+    height: 44,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  deptIcon: {
+    marginRight: 8,
+  },
+  deptInput: {
+    flex: 1,
+    color: "#1A1A1A",
+    fontSize: 14,
+  },
+  clearButton: {
+    padding: 2,
+  },
+  filterChip: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 22,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  filterChipActive: {
+    backgroundColor: "rgba(79, 172, 254, 0.1)",
+    borderColor: "#4FACFE",
+  },
+  filterText: {
+    color: "#666",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  filterTextActive: {
+    color: "#4FACFE",
+  },
+  loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: 15,
+    color: "#666",
     fontSize: 16,
-    color: colors.subText,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: colors.subText,
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  filterContainer: {
-    flexDirection: "row",
-    padding: 16,
-    gap: 8,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  filterButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-  },
-  filterButtonActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  filterButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.subText,
-  },
-  filterButtonTextActive: {
-    color: colors.white,
   },
   listContent: {
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+  },
+  emptyContainer: {
+    marginTop: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    color: "#999",
+    fontSize: 18,
+    marginTop: 12,
+  },
+  retryButton: {
+    marginTop: 25,
+    paddingHorizontal: 35,
+    paddingVertical: 14,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: "#4FACFE",
+  },
+  retryText: {
+    color: "#4FACFE",
+    fontWeight: "bold",
+    fontSize: 15,
   },
 });

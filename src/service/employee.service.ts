@@ -6,7 +6,11 @@
  */
 
 import { employeeApi } from "../api/employee.api";
-import { Employee, EmployeeQueryParams } from "../types/api.types";
+import {
+  Employee,
+  EmployeeQueryParams,
+  EnrollEmployeeFaceResponse,
+} from "../types/api.types";
 
 export const employeeService = {
   async getEmployees(params?: EmployeeQueryParams): Promise<Employee[]> {
@@ -34,4 +38,20 @@ export const employeeService = {
       throw error;
     }
   },
+  async enrollFace(id: string, file: any): Promise<EnrollEmployeeFaceResponse> {
+    try {
+      return await employeeApi.enrollFace(id, file);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getEnrolledImages(id: string): Promise<any> {
+    try {
+      return await employeeApi.getEnrolledImages(id);
+    } catch (error) {
+      console.log("Error fetching enrolled images:", error);
+      return null;
+    }
+  }
 };

@@ -5,7 +5,11 @@
  * - createEmployee(): Tạo nhân viên mới (Admin/HR only)
  */
 
-import { Employee, EmployeeQueryParams } from "../types/api.types";
+import {
+  Employee,
+  EmployeeQueryParams,
+  EnrollEmployeeFaceResponse,
+} from "../types/api.types";
 import { API_ENDPOINTS } from "../utils/constants";
 import axiosClient from "./axiosClient";
 
@@ -33,4 +37,34 @@ export const employeeApi = {
       throw error;
     }
   },
+  async enrollFace(id: string, file: any): Promise<EnrollEmployeeFaceResponse> {
+    try {
+      const formData = new FormData();
+      formData.append("File", file);
+
+      const response = await axiosClient.post<any, EnrollEmployeeFaceResponse>(
+        `${API_ENDPOINTS.EMPLOYEES}/${id}/enroll-face`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getEnrolledImages(id: string): Promise<any> {
+    try {
+      const response = await axiosClient.get(
+        `${API_ENDPOINTS.EMPLOYEES}/${id}/images`
+      );
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
