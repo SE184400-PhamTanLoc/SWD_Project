@@ -4,7 +4,11 @@ import AppNavigator from "./AppNavigator";
 import AuthNavigator from "./AuthNavigator";
 
 export default function RootNavigator() {
-  const { token } = useAuth();
+  const { token, loading } = useAuth();
+
+  if (loading) {
+    return null; // Or a Splash screen
+  }
 
   return token ? <AppNavigator /> : <AuthNavigator />;
 }

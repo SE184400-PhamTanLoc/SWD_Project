@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -15,26 +15,27 @@ import {
     View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Department, departmentApi } from "../api/department.api";
+import axiosClient from "../api/axiosClient";
+import { productionLineApi } from "../api/productionLine.api";
 import CustomAlert from "../components/CustomAlert";
-import { employeeService } from "../service/employee.service";
 import { AppStackParamList } from "../types/navigation.types";
 
-type Props = NativeStackScreenProps<AppStackParamList, "AddEmployee">;
+type Props = NativeStackScreenProps<AppStackParamList, "AddProductionLine">;
 
-export function AddEmployeeScreen({ navigation }: Props) {
+interface Department {
+    id: number;
+    name: string;
+}
+
+export function AddProductionLineScreen({ navigation }: Props) {
     const [loading, setLoading] = useState(false);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [form, setForm] = useState({
-        fullName: "",
-        employeeCode: "",
-        email: "",
-        phoneNumber: "",
-        identityNumber: "",
-        dateOfBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 20)).toISOString().split("T")[0],
-        hireDate: new Date().toISOString().split("T")[0],
-        isActive: true,
+        lineName: "",
         departmentId: "",
+        capacity: "",
+        machineCount: "",
+        status: "Active",
     });
 
     const [alert, setAlert] = useState({
@@ -51,10 +52,10 @@ export function AddEmployeeScreen({ navigation }: Props) {
 
     const fetchDepartments = async () => {
         try {
-            const data = await departmentApi.getDepartments();
-            setDepartments(data);
-            if (data.length > 0) {
-                setForm(prev => ({ ...prev, departmentId: data[0].id.toString() }));
+            const response = await axiosClient.get<any, Department[]>("/Departments");
+            setDepartments(response);
+            if (response.length > 0) {
+                setForm(prev => ({ ...prev, departmentId: response[0].id.toString() }));
             }
         } catch (error) {
             console.error("Error fetching departments:", error);
@@ -66,11 +67,11 @@ export function AddEmployeeScreen({ navigation }: Props) {
     };
 
     const onSave = async () => {
-        if (!form.fullName || !form.employeeCode || !form.departmentId) {
+        if (!form.lineName || !form.departmentId) {
             setAlert({
                 visible: true,
                 title: "Validation Error",
-                message: "Full Name, Employee Code and Department are required",
+                message: "Line Name and Department are required",
                 type: "error",
                 onConfirm: undefined,
             });
@@ -79,34 +80,29 @@ export function AddEmployeeScreen({ navigation }: Props) {
 
         setLoading(true);
         try {
-            const dataToSave = {
-                ...form,
+            const data = {
+                lineName: form.lineName,
                 departmentId: parseInt(form.departmentId),
-                dateOfBirth: new Date(form.dateOfBirth).toISOString(),
-                hireDate: new Date(form.hireDate).toISOString(),
+                capacity: form.capacity ? parseInt(form.capacity) : null,
+                machineCount: form.machineCount ? parseInt(form.machineCount) : null,
+                status: form.status,
             };
-            await employeeService.createEmployee(dataToSave as any);
+
+            await productionLineApi.createProductionLine(data as any);
+
             setAlert({
                 visible: true,
                 title: "Success",
-                message: "Employee created successfully!",
+                message: "Production Line created successfully!",
                 type: "success",
                 onConfirm: () => navigation.goBack(),
             });
         } catch (error: any) {
-            console.error("Create employee error:", error);
-            let message = error.message || "Failed to create employee";
-            let title = "Error";
-
-            if (error.response?.status === 403) {
-                title = "Permission Denied";
-                message = "Your account does not have permission (Admin/HR) to create employees.";
-            }
-
+            console.error("Create production line error:", error);
             setAlert({
                 visible: true,
-                title: title,
-                message: message,
+                title: "Error",
+                message: error.message || "Failed to create production line",
                 type: "error",
                 onConfirm: undefined,
             });
@@ -126,52 +122,22 @@ export function AddEmployeeScreen({ navigation }: Props) {
                         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                             <Ionicons name="chevron-back" size={28} color="#333" />
                         </TouchableOpacity>
-                        <Text style={styles.title}>New Employee</Text>
+                        <Text style={styles.title}>New Production Line</Text>
                         <View style={{ width: 28 }} />
                     </Animated.View>
 
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                         <Animated.View entering={FadeInDown.delay(200).duration(800)} style={styles.form}>
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Full Name *</Text>
+                                <Text style={styles.label}>Line Name *</Text>
                                 <View style={styles.inputContainer}>
-                                    <Ionicons name="person-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+                                    <Ionicons name="git-network-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
                                     <TextInput
-                                        placeholder="Enter full name"
+                                        placeholder="Enter line name"
                                         placeholderTextColor="#999"
                                         style={styles.input}
-                                        value={form.fullName}
-                                        onChangeText={(v) => handleInputChange("fullName", v)}
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Employee Code *</Text>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="barcode-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
-                                    <TextInput
-                                        placeholder="EMP001"
-                                        placeholderTextColor="#999"
-                                        style={styles.input}
-                                        value={form.employeeCode}
-                                        onChangeText={(v) => handleInputChange("employeeCode", v)}
-                                        autoCapitalize="characters"
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Identity Number (CCCD/CMND)</Text>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="card-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
-                                    <TextInput
-                                        placeholder="Enter identity number"
-                                        placeholderTextColor="#999"
-                                        style={styles.input}
-                                        value={form.identityNumber}
-                                        onChangeText={(v) => handleInputChange("identityNumber", v)}
-                                        keyboardType="numeric"
+                                        value={form.lineName}
+                                        onChangeText={(v) => handleInputChange("lineName", v)}
                                     />
                                 </View>
                             </View>
@@ -192,78 +158,61 @@ export function AddEmployeeScreen({ navigation }: Props) {
                                                 styles.selectorText,
                                                 form.departmentId === dept.id.toString() && styles.selectorTextActive
                                             ]}>
-                                                [{dept.departmentCode}] {dept.name}
+                                                {dept.name}
                                             </Text>
                                         </TouchableOpacity>
                                     ))}
                                 </ScrollView>
-                                {departments.length === 0 && (
-                                    <Text style={styles.helperText}>No departments found. Please create one first.</Text>
-                                )}
                             </View>
 
                             <View style={styles.inputRow}>
                                 <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
-                                    <Text style={styles.label}>Date of Birth</Text>
+                                    <Text style={styles.label}>Capacity</Text>
                                     <View style={styles.inputContainer}>
                                         <TextInput
-                                            placeholder="1990-01-01"
+                                            placeholder="20"
                                             placeholderTextColor="#999"
                                             style={styles.input}
-                                            value={form.dateOfBirth}
-                                            onChangeText={(v) => handleInputChange("dateOfBirth", v)}
+                                            value={form.capacity}
+                                            onChangeText={(v) => handleInputChange("capacity", v)}
+                                            keyboardType="numeric"
                                         />
                                     </View>
                                 </View>
                                 <View style={[styles.inputGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>Hire Date</Text>
+                                    <Text style={styles.label}>Machines</Text>
                                     <View style={styles.inputContainer}>
                                         <TextInput
-                                            placeholder="2024-01-01"
+                                            placeholder="5"
                                             placeholderTextColor="#999"
                                             style={styles.input}
-                                            value={form.hireDate}
-                                            onChangeText={(v) => handleInputChange("hireDate", v)}
+                                            value={form.machineCount}
+                                            onChangeText={(v) => handleInputChange("machineCount", v)}
+                                            keyboardType="numeric"
                                         />
                                     </View>
                                 </View>
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Email Address</Text>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="mail-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
-                                    <TextInput
-                                        placeholder="email@company.com"
-                                        placeholderTextColor="#999"
-                                        style={styles.input}
-                                        value={form.email}
-                                        onChangeText={(v) => handleInputChange("email", v)}
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Phone Number</Text>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="call-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
-                                    <TextInput
-                                        placeholder="0123456789"
-                                        placeholderTextColor="#999"
-                                        style={styles.input}
-                                        value={form.phoneNumber}
-                                        onChangeText={(v) => handleInputChange("phoneNumber", v)}
-                                        keyboardType="phone-pad"
-                                    />
+                                <Text style={styles.label}>Status</Text>
+                                <View style={styles.roleButtons}>
+                                    {["Active", "Inactive", "Maintenance"].map((s) => (
+                                        <TouchableOpacity
+                                            key={s}
+                                            style={[styles.roleButton, form.status === s && styles.roleButtonActive]}
+                                            onPress={() => handleInputChange("status", s)}
+                                        >
+                                            <Text style={[styles.roleButtonText, form.status === s && styles.roleButtonTextActive]}>{s}</Text>
+                                        </TouchableOpacity>
+                                    ))}
                                 </View>
                             </View>
 
                             <TouchableOpacity
-                                style={[styles.saveButton, (loading || departments.length === 0) && styles.disabled]}
+                                style={[styles.saveButton, loading && styles.disabled]}
                                 onPress={onSave}
-                                disabled={loading || departments.length === 0}
+                                disabled={loading}
                             >
                                 <LinearGradient
                                     colors={["#00F2FE", "#4FACFE"]}
@@ -274,7 +223,7 @@ export function AddEmployeeScreen({ navigation }: Props) {
                                     {loading ? (
                                         <ActivityIndicator color="white" />
                                     ) : (
-                                        <Text style={styles.saveButtonText}>CREATE EMPLOYEE</Text>
+                                        <Text style={styles.saveButtonText}>CREATE PRODUCTION LINE</Text>
                                     )}
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -379,7 +328,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#F0F0F0",
         marginRight: 10,
-        minWidth: 100,
+        minWidth: 80,
         alignItems: "center",
     },
     selectorItemActive: {
@@ -394,11 +343,31 @@ const styles = StyleSheet.create({
     selectorTextActive: {
         color: "#4FACFE",
     },
-    helperText: {
+    roleButtons: {
+        flexDirection: "row",
+        gap: 10,
+    },
+    roleButton: {
+        flex: 1,
+        height: 48,
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: "#E0E0E0",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "white",
+    },
+    roleButtonActive: {
+        borderColor: "#4FACFE",
+        backgroundColor: "rgba(79, 172, 254, 0.1)",
+    },
+    roleButtonText: {
+        color: "#666",
         fontSize: 12,
-        color: "#FF4D4D",
-        marginTop: 5,
-        marginLeft: 5,
+        fontWeight: "600",
+    },
+    roleButtonTextActive: {
+        color: "#4FACFE",
     },
     saveButton: {
         height: 64,

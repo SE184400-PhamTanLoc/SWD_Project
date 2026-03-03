@@ -10,6 +10,10 @@ export const API_ENDPOINTS = {
   IOT_DEVICES: "/IoTDevices",
   IOT_REGISTER: "/IoTDevices/register",
   FACE_CHECKIN: "/Attendance/face-checkin", // POST: check-in with face recognition
+  SHIFTS: "/Shifts",
+  SHIFT_ASSIGN: "/Shifts/assign",
+  SHIFT_ASSIGNMENTS: "/Shifts/assignments",
+  DEPARTMENTS: "/Departments",
 };
 export const STORAGE_KEYS = {
   TOKEN: "@auth_token",

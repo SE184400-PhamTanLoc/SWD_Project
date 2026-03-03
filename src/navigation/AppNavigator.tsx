@@ -1,15 +1,20 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
+  AddDepartmentScreen,
   AddEmployeeScreen,
   AddIoTDeviceScreen,
+  AddProductionLineScreen,
+  AddShiftScreen,
+  AttendanceCheckInScreen,
+  DepartmentListScreen,
   EmployeeListScreen,
   EnrollFaceScreen,
   HomeScreen,
   IoTDeviceListScreen,
+  ProductionLineListScreen,
+  ShiftListScreen,
 } from "../screens";
 import { AppStackParamList } from "../types/navigation.types";
-
-// Define navigation param list
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -26,6 +31,13 @@ const AppNavigator = () => {
       <Stack.Screen name="EnrollFace" component={EnrollFaceScreen} />
       <Stack.Screen name="IoTDeviceList" component={IoTDeviceListScreen} />
       <Stack.Screen name="AddIoTDevice" component={AddIoTDeviceScreen} />
+      <Stack.Screen name="DepartmentList" component={DepartmentListScreen} />
+      <Stack.Screen name="AddDepartment" component={AddDepartmentScreen} />
+      <Stack.Screen name="ProductionLineList" component={ProductionLineListScreen} />
+      <Stack.Screen name="AddProductionLine" component={AddProductionLineScreen} />
+      <Stack.Screen name="ShiftList" component={ShiftListScreen} />
+      <Stack.Screen name="AddShift" component={AddShiftScreen} />
+      <Stack.Screen name="AttendanceCheckIn" component={AttendanceCheckInScreen} />
     </Stack.Navigator>
   );
 };

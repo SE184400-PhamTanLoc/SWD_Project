@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -26,122 +27,234 @@ export function HomeScreen({ navigation }: Props) {
     return "Good Evening";
   };
 
+  const isAdmin = user?.roles?.some(r =>
+    ["ADMIN", "ADMINISTRATOR", "HR"].includes(r.toUpperCase())
+  );
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.content}>
-          <Animated.View entering={FadeInUp.duration(800)} style={styles.header}>
-            <View>
-              <Text style={styles.greetingText}>{getGreeting()},</Text>
-              <Text style={styles.userName}>{user?.fullName || user?.username || "Admin"}</Text>
-            </View>
-            <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
-              <LinearGradient
-                colors={["#4FACFE", "#00F2FE"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.avatar}
-              >
-                <Ionicons name="person" size={24} color="white" />
-              </LinearGradient>
-              <View style={styles.onlineStatus} />
-            </TouchableOpacity>
-          </Animated.View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* ─── Hero Header with Gradient ─── */}
+          <LinearGradient
+            colors={["#1A1A2E", "#16213E", "#0F3460"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.heroGradient}
+          >
+            <Animated.View entering={FadeInUp.duration(800)} style={styles.header}>
+              <View style={styles.headerLeft}>
+                <Text style={styles.greetingText}>{getGreeting()},</Text>
+                <Text style={styles.userName}>{user?.fullName || user?.username || "Admin"}</Text>
+                {user?.roles && user.roles.length > 0 && (
+                  <View style={styles.roleBadge}>
+                    <Ionicons name="shield-checkmark" size={10} color="#4FACFE" />
+                    <Text style={styles.roleText}>{user.roles[0]}</Text>
+                  </View>
+                )}
+              </View>
+              <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
+                <LinearGradient
+                  colors={["#4FACFE", "#00F2FE"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.avatar}
+                >
+                  <Ionicons name="person" size={24} color="white" />
+                </LinearGradient>
+                <View style={styles.onlineStatus} />
+              </TouchableOpacity>
+            </Animated.View>
 
-          <Animated.View entering={FadeInDown.delay(200).duration(800)} style={styles.mainStatsContainer}>
-            <View style={styles.statBox}>
-              <View style={[styles.statIconCircle, { backgroundColor: "rgba(79, 172, 254, 0.1)" }]}>
-                <Ionicons name="people" size={20} color="#4FACFE" />
-              </View>
-              <View>
-                <Text style={styles.statValue}>124</Text>
-                <Text style={styles.statName}>Employees</Text>
-              </View>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statBox}>
-              <View style={[styles.statIconCircle, { backgroundColor: "rgba(0, 242, 254, 0.1)" }]}>
-                <Ionicons name="checkmark-circle" size={20} color="#00F2FE" />
-              </View>
-              <View>
-                <Text style={styles.statValue}>82%</Text>
-                <Text style={styles.statName}>Attendance</Text>
-              </View>
-            </View>
-          </Animated.View>
+            {/* Date Banner */}
+            <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.dateBanner}>
+              <Ionicons name="calendar-outline" size={14} color="rgba(255,255,255,0.5)" />
+              <Text style={styles.dateText}>{dateStr}</Text>
+            </Animated.View>
 
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Command Center</Text>
-            <Text style={styles.sectionSubtitle}>Select an operation to begin</Text>
-          </View>
+            {/* Quick Stats inside hero */}
+            <Animated.View entering={FadeInDown.delay(300).duration(800)} style={styles.statsRow}>
+              <View style={styles.statBox}>
+                <View style={[styles.statIconCircle, { backgroundColor: "rgba(79, 172, 254, 0.2)" }]}>
+                  <Ionicons name="people" size={18} color="#4FACFE" />
+                </View>
+                <View>
+                  <Text style={styles.statValue}>124</Text>
+                  <Text style={styles.statName}>Employees</Text>
+                </View>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statBox}>
+                <View style={[styles.statIconCircle, { backgroundColor: "rgba(0, 242, 254, 0.2)" }]}>
+                  <Ionicons name="checkmark-circle" size={18} color="#00F2FE" />
+                </View>
+                <View>
+                  <Text style={styles.statValue}>82%</Text>
+                  <Text style={styles.statName}>Attendance</Text>
+                </View>
+              </View>
+            </Animated.View>
+          </LinearGradient>
 
-          <View style={styles.menuGrid}>
-            <Animated.View entering={FadeInDown.delay(400).duration(800)} style={styles.menuItemWrapper}>
+          <View style={styles.content}>
+            {/* ─── Primary Action: Employees ─── */}
+            <Animated.View entering={FadeInDown.delay(400).duration(800)}>
               <TouchableOpacity
-                style={styles.menuCard}
+                style={styles.primaryCard}
                 onPress={() => navigation.navigate("EmployeeList")}
                 activeOpacity={0.9}
               >
                 <LinearGradient
-                  colors={["rgba(79, 172, 254, 0.15)", "rgba(79, 172, 254, 0.05)"]}
-                  style={styles.menuIconContainer}
+                  colors={["#4FACFE", "#00F2FE"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.primaryGradient}
                 >
-                  <Ionicons name="people-outline" size={32} color="#4FACFE" />
+                  <View style={styles.primaryIconWrap}>
+                    <Ionicons name="people" size={28} color="white" />
+                  </View>
+                  <View style={styles.primaryTextWrap}>
+                    <Text style={styles.primaryTitle}>Employees</Text>
+                    <Text style={styles.primaryDesc}>View & manage staff registry</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={22} color="rgba(255,255,255,0.7)" />
                 </LinearGradient>
-                <Text style={styles.menuTitle}>Employees</Text>
-                <Text style={styles.menuDesc}>Registry Operations</Text>
-                <Ionicons name="arrow-forward" size={16} color="#4FACFE" style={styles.cardArrow} />
               </TouchableOpacity>
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(500).duration(800)} style={styles.menuItemWrapper}>
-              <TouchableOpacity style={styles.menuCard} activeOpacity={0.9}>
-                <LinearGradient
-                  colors={["rgba(0, 242, 254, 0.15)", "rgba(0, 242, 254, 0.05)"]}
-                  style={styles.menuIconContainer}
-                >
-                  <Ionicons name="calendar-outline" size={32} color="#00F2FE" />
-                </LinearGradient>
-                <Text style={styles.menuTitle}>Attendance</Text>
-                <Text style={styles.menuDesc}>Reporting Suite</Text>
-                <Ionicons name="arrow-forward" size={16} color="#00F2FE" style={styles.cardArrow} />
-              </TouchableOpacity>
+            {/* ─── Management (Admin only) ─── */}
+            {isAdmin && (
+              <>
+                <Animated.View entering={FadeInDown.delay(500).duration(800)}>
+                  <Text style={styles.sectionTitle}>Management</Text>
+                </Animated.View>
+
+                <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.compactRow}>
+                  <TouchableOpacity
+                    style={styles.compactCard}
+                    onPress={() => navigation.navigate("DepartmentList")}
+                    activeOpacity={0.85}
+                  >
+                    <View style={[styles.compactIcon, { backgroundColor: "rgba(79, 172, 254, 0.1)" }]}>
+                      <Ionicons name="business" size={22} color="#4FACFE" />
+                    </View>
+                    <Text style={styles.compactTitle}>Depts</Text>
+                    <Text style={styles.compactSub}>Departments</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.compactCard}
+                    onPress={() => navigation.navigate("ProductionLineList")}
+                    activeOpacity={0.85}
+                  >
+                    <View style={[styles.compactIcon, { backgroundColor: "rgba(0, 200, 150, 0.1)" }]}>
+                      <Ionicons name="git-network" size={22} color="#00C896" />
+                    </View>
+                    <Text style={styles.compactTitle}>Lines</Text>
+                    <Text style={styles.compactSub}>Production</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.compactCard}
+                    onPress={() => navigation.navigate("ShiftList")}
+                    activeOpacity={0.85}
+                  >
+                    <View style={[styles.compactIcon, { backgroundColor: "rgba(255, 152, 0, 0.1)" }]}>
+                      <Ionicons name="time" size={22} color="#FF9800" />
+                    </View>
+                    <Text style={styles.compactTitle}>Shifts</Text>
+                    <Text style={styles.compactSub}>Scheduling</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              </>
+            )}
+
+            {/* ─── System ─── */}
+            <Animated.View entering={FadeInDown.delay(700).duration(800)}>
+              <Text style={styles.sectionTitle}>System</Text>
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.menuItemWrapper}>
+            <Animated.View entering={FadeInDown.delay(800).duration(800)} style={styles.compactRow}>
               <TouchableOpacity
-                style={styles.menuCard}
-                onPress={() => navigation.navigate("IoTDeviceList")}
-                activeOpacity={0.9}
+                style={styles.compactCard}
+                onPress={() => navigation.navigate("AttendanceCheckIn" as any)}
+                activeOpacity={0.85}
               >
-                <LinearGradient
-                  colors={["rgba(75, 121, 161, 0.15)", "rgba(75, 121, 161, 0.05)"]}
-                  style={styles.menuIconContainer}
-                >
-                  <Ionicons name="hardware-chip-outline" size={32} color="#4B79A1" />
-                </LinearGradient>
-                <Text style={styles.menuTitle}>IoT Nodes</Text>
-                <Text style={styles.menuDesc}>System Hardware</Text>
-                <Ionicons name="arrow-forward" size={16} color="#4B79A1" style={styles.cardArrow} />
+                <View style={[styles.compactIcon, { backgroundColor: "rgba(102, 126, 234, 0.1)" }]}>
+                  <Ionicons name="scan" size={22} color="#667EEA" />
+                </View>
+                <Text style={styles.compactTitle}>Check-in</Text>
+                <Text style={styles.compactSub}>Face Scan</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.compactCard}
+                onPress={() => navigation.navigate("IoTDeviceList")}
+                activeOpacity={0.85}
+              >
+                <View style={[styles.compactIcon, { backgroundColor: "rgba(75, 121, 161, 0.1)" }]}>
+                  <Ionicons name="hardware-chip" size={22} color="#4B79A1" />
+                </View>
+                <Text style={styles.compactTitle}>IoT</Text>
+                <Text style={styles.compactSub}>Devices</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.compactCard, { borderColor: "rgba(255, 77, 77, 0.15)" }]}
+                onPress={logout}
+                activeOpacity={0.85}
+              >
+                <View style={[styles.compactIcon, { backgroundColor: "rgba(255, 77, 77, 0.1)" }]}>
+                  <Ionicons name="log-out" size={22} color="#FF4D4D" />
+                </View>
+                <Text style={[styles.compactTitle, { color: "#FF4D4D" }]}>Logout</Text>
+                <Text style={styles.compactSub}>Sign out</Text>
               </TouchableOpacity>
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(700).duration(800)} style={styles.menuItemWrapper}>
-              <TouchableOpacity style={styles.menuCard} onPress={logout} activeOpacity={0.9}>
-                <LinearGradient
-                  colors={["rgba(255, 77, 77, 0.15)", "rgba(255, 77, 77, 0.05)"]}
-                  style={styles.menuIconContainer}
-                >
-                  <Ionicons name="log-out-outline" size={32} color="#FF4D4D" />
-                </LinearGradient>
-                <Text style={styles.menuTitle}>Logout</Text>
-                <Text style={styles.menuDesc}>Secure Exit</Text>
-                <Ionicons name="power-outline" size={16} color="#FF4D4D" style={styles.cardArrow} />
-              </TouchableOpacity>
+            {/* ─── Quick Tips Card ─── */}
+            <Animated.View entering={FadeInDown.delay(900).duration(800)}>
+              <View style={styles.tipsCard}>
+                <View style={styles.tipsHeader}>
+                  <View style={styles.tipsIconWrap}>
+                    <Ionicons name="bulb" size={18} color="#FF9800" />
+                  </View>
+                  <Text style={styles.tipsTitle}>Quick Tips</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.tipDot} />
+                  <Text style={styles.tipText}>Use face recognition for faster attendance check-in</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.tipDot} />
+                  <Text style={styles.tipText}>Create departments before adding production lines</Text>
+                </View>
+                <View style={styles.tipItem}>
+                  <View style={styles.tipDot} />
+                  <Text style={styles.tipText}>Pull down to refresh on any list screen</Text>
+                </View>
+              </View>
+            </Animated.View>
+
+            {/* Footer */}
+            <Animated.View entering={FadeInDown.delay(1000).duration(800)} style={styles.footer}>
+              <Text style={styles.footerText}>HRMS Face Attendance v1.0</Text>
+              <Text style={styles.footerSub}>Smart Workforce Management</Text>
             </Animated.View>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -150,160 +263,312 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F5F6FA",
   },
   safeArea: {
     flex: 1,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: 25,
-    paddingTop: 20,
+  scrollContent: {
+    flexGrow: 1,
   },
+
+  // ─── Hero Gradient ───
+  heroGradient: {
+    paddingHorizontal: 22,
+    paddingTop: 16,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+  // ─── Header ───
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 35,
+    marginBottom: 12,
   },
+  headerLeft: {},
   greetingText: {
-    color: "#999",
-    fontSize: 15,
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 14,
     fontWeight: "500",
     letterSpacing: 0.5,
   },
   userName: {
-    color: "#1A1A1A",
-    fontSize: 28,
+    color: "white",
+    fontSize: 26,
     fontWeight: "bold",
     marginTop: 2,
+  },
+  roleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(79, 172, 254, 0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginTop: 6,
+    gap: 4,
+  },
+  roleText: {
+    color: "#4FACFE",
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
   },
   profileButton: {
     position: "relative",
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#4FACFE",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.4,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 6,
   },
   onlineStatus: {
     position: "absolute",
-    bottom: -2,
-    right: -2,
+    bottom: -1,
+    right: -1,
     width: 14,
     height: 14,
     borderRadius: 7,
     backgroundColor: "#00E676",
     borderWidth: 2.5,
-    borderColor: "white",
+    borderColor: "#16213E",
   },
-  mainStatsContainer: {
+
+  // ─── Date Banner ───
+  dateBanner: {
     flexDirection: "row",
-    backgroundColor: "#F8F9FA",
-    borderRadius: 25,
-    padding: 20,
     alignItems: "center",
-    marginBottom: 35,
+    gap: 6,
+    marginBottom: 16,
+  },
+  dateText: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 12,
+    fontWeight: "500",
+  },
+
+  // ─── Stats (inside hero) ───
+  statsRow: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 20,
+    padding: 16,
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: "rgba(255,255,255,0.06)",
   },
   statBox: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 5,
+    paddingHorizontal: 4,
   },
   statIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 13,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
+    marginRight: 12,
   },
   statValue: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#1A1A1A",
+    color: "white",
   },
   statName: {
-    fontSize: 12,
-    color: "#999",
+    fontSize: 11,
+    color: "rgba(255,255,255,0.5)",
     fontWeight: "500",
   },
   statDivider: {
     width: 1,
-    height: 35,
-    backgroundColor: "#E0E0E0",
-    marginHorizontal: 10,
+    height: 30,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    marginHorizontal: 6,
   },
-  sectionHeader: {
-    marginBottom: 20,
+
+  // ─── Content (below hero) ───
+  content: {
+    paddingHorizontal: 22,
+    paddingTop: 24,
+    paddingBottom: 30,
   },
+
+  // ─── Section Title ───
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1A1A1A",
-    letterSpacing: 0.3,
-  },
-  sectionSubtitle: {
     fontSize: 13,
-    color: "#666",
-    marginTop: 2,
+    fontWeight: "700",
+    color: "#AAA",
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    marginBottom: 14,
+    marginTop: 10,
   },
-  menuGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  menuItemWrapper: {
-    width: "47.5%",
-    marginBottom: 18,
-  },
-  menuCard: {
-    backgroundColor: "white",
-    padding: 22,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: "#F0F0F0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.04,
-    shadowRadius: 15,
-    elevation: 3,
-  },
-  menuIconContainer: {
-    width: 64,
-    height: 64,
+
+  // ─── Primary Card ───
+  primaryCard: {
+    marginBottom: 22,
     borderRadius: 22,
+    overflow: "hidden",
+    shadowColor: "#4FACFE",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  primaryGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 22,
+    paddingHorizontal: 22,
+  },
+  primaryIconWrap: {
+    width: 54,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 18,
+    marginRight: 16,
   },
-  menuTitle: {
-    color: "#1A1A1A",
-    fontSize: 17,
+  primaryTextWrap: {
+    flex: 1,
+  },
+  primaryTitle: {
+    color: "white",
+    fontSize: 19,
     fontWeight: "bold",
   },
-  menuDesc: {
-    color: "#999",
-    fontSize: 11,
+  primaryDesc: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 13,
     fontWeight: "500",
-    marginTop: 4,
+    marginTop: 3,
+  },
+
+  // ─── Compact Cards (3-column) ───
+  compactRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  compactCard: {
+    flex: 1,
+    backgroundColor: "white",
+    borderRadius: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: "#ECECEC",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  compactIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  compactTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#333",
+  },
+  compactSub: {
+    fontSize: 10,
+    fontWeight: "500",
+    color: "#BBB",
+    marginTop: 2,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  cardArrow: {
-    position: "absolute",
-    top: 22,
-    right: 22,
-    opacity: 0.6,
+
+  // ─── Tips Card ───
+  tipsCard: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  tipsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  tipsIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "rgba(255, 152, 0, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  tipsTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#333",
+  },
+  tipItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  tipDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#4FACFE",
+    marginTop: 5,
+    marginRight: 10,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#777",
+    lineHeight: 18,
+  },
+
+  // ─── Footer ───
+  footer: {
+    alignItems: "center",
+    marginTop: 24,
+    paddingBottom: 10,
+  },
+  footerText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#CCC",
+  },
+  footerSub: {
+    fontSize: 11,
+    color: "#DDD",
+    marginTop: 2,
   },
 });

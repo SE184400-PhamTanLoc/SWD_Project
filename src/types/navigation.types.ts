@@ -5,4 +5,11 @@ export type AppStackParamList = {
     EnrollFace: { employeeId: string; employeeName: string };
     IoTDeviceList: undefined;
     AddIoTDevice: undefined;
+    DepartmentList: undefined;
+    AddDepartment: undefined;
+    ProductionLineList: undefined;
+    AddProductionLine: undefined;
+    ShiftList: undefined;
+    AddShift: undefined;
+    AttendanceCheckIn: undefined;
 };

@@ -101,8 +101,10 @@ export default function LoginScreen({ navigation }: Props) {
         const response = await authService.login(trimmedData);
 
         login(response.token, {
+          id: response.user.id,
           username: response.user.username,
           fullName: response.user.fullName ?? response.user.username,
+          roles: response.user.roles || [],
         });
 
         setAlert({

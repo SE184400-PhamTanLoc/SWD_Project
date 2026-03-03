@@ -57,6 +57,8 @@ export interface Employee {
   departmentId: number | null; // ID phòng ban
   hireDate: string; // Ngày vào làm (ISO 8601)
   isActive: boolean; // Trạng thái hoạt động
+  productionLineName?: string;
+  shiftName?: string;
 }
 
 // Query params cho GET /api/employees
@@ -70,4 +72,33 @@ export interface EnrollEmployeeFaceResponse {
   employeeCode?: string;
   employeeName?: string;
   label?: number;
+}
+
+// ===== SHIFT & ATTENDANCE TYPES =====
+export interface Shift {
+  id: string;
+  shiftCode: string;
+  name: string;
+  startTime: string; // "HH:mm:ss"
+  endTime: string; // "HH:mm:ss"
+}
+
+export interface ShiftAssignment {
+  id: string; // GUID
+  employeeId: string;
+  shiftId: string;
+  fromDate: string;
+  toDate: string;
+  productionLineId?: number;
+  productionLineName?: string;
+  shift?: Shift;
+}
+
+export interface FaceCheckInResponse {
+  success: boolean;
+  message: string;
+  employeeName?: string;
+  checkInTime?: string;
+  status?: "CheckedIn" | "CheckedOut" | "WrongLocation" | "UnknownFace" | "AlreadyCheckedOut" | "Error";
+  confidence?: number;
 }
