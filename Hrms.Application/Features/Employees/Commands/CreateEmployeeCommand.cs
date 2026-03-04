@@ -16,5 +16,7 @@ namespace Hrms.Application.Features.Employees.Commands
         public string? IdentityNumber { get; set; }
         public int? DepartmentId { get; set; }
         public DateTime HireDate { get; set; }
+        public int? ProductionLineId { get; set; }
+        public Guid? ShiftId { get; set; }
     }
 }

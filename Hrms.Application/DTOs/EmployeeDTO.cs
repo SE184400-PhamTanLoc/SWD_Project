@@ -12,5 +12,11 @@
         public int? DepartmentId { get; set; }
         public DateTime HireDate { get; set; }
         public bool IsActive { get; set; } = true;
+
+        // Bổ sung thông tin gán hiện tại
+        public string? ProductionLineName { get; set; }
+        public string? ShiftName { get; set; }
+        public int? ProductionLineId { get; set; }
+        public Guid? ShiftId { get; set; }
     }
 }

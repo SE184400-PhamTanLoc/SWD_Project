@@ -29,13 +29,13 @@ namespace Hrms.Api.Controllers
         /// POST /api/shifts
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult> CreateShift([FromBody] CreateShiftCommand command)
         {
             try
             {
-                var shiftId = await _mediator.Send(command);
-                return Ok(new { shiftId, message = "Shift created successfully" });
+                var id = await _mediator.Send(command);
+                return Ok(new { id, message = "Shift created successfully" });
             }
             catch (InvalidOperationException ex)
             {
@@ -48,7 +48,7 @@ namespace Hrms.Api.Controllers
         /// POST /api/shifts/assign
         /// </summary>
         [HttpPost("assign")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult> AssignShift([FromBody] AssignShiftToEmployeeCommand command)
         {
             try
@@ -67,11 +67,39 @@ namespace Hrms.Api.Controllers
         }
 
         /// <summary>
+        /// Cập nhật shift assignment
+        /// PUT /api/shifts/assignments/{id}
+        /// </summary>
+        [HttpPut("assignments/{id}")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
+        public async Task<ActionResult> UpdateAssignment(Guid id, [FromBody] UpdateShiftAssignmentCommand command)
+        {
+            if (id != command.Id)
+            {
+                return BadRequest(new { message = "ID mismatch" });
+            }
+
+            try
+            {
+                await _mediator.Send(command);
+                return Ok(new { message = "Shift assignment updated successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Cập nhật shift
         /// PUT /api/shifts/{id}
         /// </summary>
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult> UpdateShift(Guid id, [FromBody] UpdateShiftCommand command)
         {
             if (id != command.Id)
@@ -99,7 +127,7 @@ namespace Hrms.Api.Controllers
         /// DELETE /api/shifts/{id}
         /// </summary>
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult> DeleteShift(Guid id)
         {
             try

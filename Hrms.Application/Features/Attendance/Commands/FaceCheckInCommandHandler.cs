@@ -46,7 +46,7 @@ namespace Hrms.Application.Features.Attendance.Commands
             IoTDevice? device = null;
             if (int.TryParse(request.DeviceId, out var deviceIdInt))
             {
-                device = await _iotDeviceRepository.GetByIdAsync(deviceIdInt, cancellationToken);
+                device = await _iotDeviceRepository.GetByIdWithProductionLineAsync(deviceIdInt, cancellationToken);
             }
 
             // 2. Gọi Python AI Service để nhận diện khuôn mặt

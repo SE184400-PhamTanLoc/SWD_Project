@@ -32,5 +32,15 @@ namespace Hrms.Application.Interface
             DateTime fromDate, 
             DateTime toDate, 
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Kiểm tra có overlap với shift assignment khác không (ngoại trừ cái đang edit)
+        /// </summary>
+        Task<bool> HasOverlappingAssignmentAsync(
+            Guid employeeId, 
+            DateTime fromDate, 
+            DateTime toDate, 
+            Guid excludeId,
+            CancellationToken cancellationToken = default);
     }
 }

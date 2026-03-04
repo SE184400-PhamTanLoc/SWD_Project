@@ -67,7 +67,7 @@ namespace Hrms.Api.Controllers
         /// POST /api/employees
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult<EmployeeDTO>> CreateEmployee([FromBody] CreateEmployeeCommand command)
         {
             try
@@ -85,7 +85,7 @@ namespace Hrms.Api.Controllers
         /// PUT /api/employees/{id}
         /// </summary>
         [HttpPut("{id:guid}")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult<EmployeeDTO>> UpdateEmployee(
             Guid id,
             [FromBody] UpdateEmployeeCommand command)
@@ -111,7 +111,7 @@ namespace Hrms.Api.Controllers
         /// DELETE /api/employees/{id}
         /// </summary>
         [HttpDelete("{id:guid}")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult> DeleteEmployee(Guid id)
         {
             try
@@ -134,7 +134,7 @@ namespace Hrms.Api.Controllers
         /// POST /api/employees/{id}/enroll-face
         /// </summary>
         [HttpPost("{id}/enroll-face")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<EnrollEmployeeFaceResponseDto>> EnrollFace(
             Guid id, 

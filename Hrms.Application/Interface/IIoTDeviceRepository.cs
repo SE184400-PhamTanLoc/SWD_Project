@@ -21,5 +21,10 @@ namespace Hrms.Application.Interface
         /// Cập nhật heartbeat cho device
         /// </summary>
         Task UpdateHeartbeatAsync(int deviceId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy thông tin thiết bị kèm theo thông tin dây chuyền sản xuất
+        /// </summary>
+        Task<IoTDevice?> GetByIdWithProductionLineAsync(int deviceId, CancellationToken cancellationToken = default);
     }
 }

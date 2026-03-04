@@ -16,12 +16,21 @@ namespace Hrms.Infrastructure.Repositories
 
         public async Task<Employee?> GetByEmployeeCodeAsync(string employeeCode, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode, cancellationToken);
+            return await _dbSet
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.Shift)
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.ProductionLine)
+                .FirstOrDefaultAsync(e => e.EmployeeCode == employeeCode, cancellationToken);
         }
 
         public async Task<IEnumerable<Employee>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default)
         {
             return await _dbSet
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.Shift)
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.ProductionLine)
                 .Where(e => e.DepartmentId == departmentId)
                 .ToListAsync(cancellationToken);
         }
@@ -29,7 +38,21 @@ namespace Hrms.Infrastructure.Repositories
         public async Task<IEnumerable<Employee>> GetActiveEmployeesAsync(CancellationToken cancellationToken = default)
         {
             return await _dbSet
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.Shift)
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.ProductionLine)
                 .Where(e => e.IsActive)
+                .ToListAsync(cancellationToken);
+        }
+
+        public override async Task<IEnumerable<Employee>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.Shift)
+                .Include(e => e.ShiftAssignments)
+                    .ThenInclude(sa => sa.ProductionLine)
                 .ToListAsync(cancellationToken);
         }
 

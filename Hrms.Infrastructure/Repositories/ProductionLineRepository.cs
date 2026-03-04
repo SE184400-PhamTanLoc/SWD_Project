@@ -14,6 +14,13 @@ namespace Hrms.Infrastructure.Repositories
         {
         }
 
+        public override async Task<IEnumerable<ProductionLine>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Include(pl => pl.Department)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<IEnumerable<ProductionLine>> GetByDepartmentIdAsync(int departmentId, CancellationToken cancellationToken = default)
         {
             return await _dbSet

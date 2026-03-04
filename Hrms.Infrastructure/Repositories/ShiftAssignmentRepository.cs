@@ -53,5 +53,18 @@ namespace Hrms.Infrastructure.Repositories
                 && sa.FromDate <= toDate
                 && sa.ToDate >= fromDate, cancellationToken);
         }
+
+        public async Task<bool> HasOverlappingAssignmentAsync(
+            Guid employeeId, 
+            DateTime fromDate, 
+            DateTime toDate, 
+            Guid excludeId,
+            CancellationToken cancellationToken = default)
+        {
+            return await _dbSet.AnyAsync(sa => sa.EmployeeId == employeeId
+                && sa.Id != excludeId
+                && sa.FromDate <= toDate
+                && sa.ToDate >= fromDate, cancellationToken);
+        }
     }
 }
