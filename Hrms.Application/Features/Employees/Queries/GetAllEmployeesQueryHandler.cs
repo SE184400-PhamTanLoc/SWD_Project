@@ -41,19 +41,33 @@ namespace Hrms.Application.Features.Employees.Queries
                 employees = await _employeeRepository.GetAllAsync(cancellationToken);
             }
 
+            var today = DateTime.Today;
+
             return employees
                 .OrderBy(e => e.EmployeeCode)
-                .Select(e => new EmployeeDTO
-                {
-                    Id = e.Id,
-                    EmployeeCode = e.EmployeeCode,
-                    FullName = e.FullName,
-                    DateOfBirth = e.DateOfBirth,
-                    PhoneNumber = e.PhoneNumber,
-                    Email = e.Email,
-                    DepartmentId = e.DepartmentId,
-                    HireDate = e.HireDate,
-                    IsActive = e.IsActive
+                .Select(e => {
+                    var currentAssignment = e.ShiftAssignments
+                        .Where(sa => sa.FromDate <= today && sa.ToDate >= today)
+                        .OrderByDescending(sa => sa.FromDate)
+                        .FirstOrDefault();
+
+                    return new EmployeeDTO
+                    {
+                        Id = e.Id,
+                        EmployeeCode = e.EmployeeCode,
+                        FullName = e.FullName,
+                        DateOfBirth = e.DateOfBirth,
+                        PhoneNumber = e.PhoneNumber,
+                        Email = e.Email,
+                        DepartmentId = e.DepartmentId,
+                        HireDate = e.HireDate,
+                        IsActive = e.IsActive,
+                        // Bổ sung thông tin gán
+                        ProductionLineId = currentAssignment?.ProductionLineId,
+                        ProductionLineName = currentAssignment?.ProductionLine?.LineName,
+                        ShiftId = currentAssignment?.ShiftId,
+                        ShiftName = currentAssignment?.Shift?.Name
+                    };
                 })
                 .ToList();
         }

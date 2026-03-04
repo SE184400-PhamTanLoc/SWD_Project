@@ -38,5 +38,12 @@ namespace Hrms.Infrastructure.Repositories
                 _dbSet.Update(device);
             }
         }
+
+        public async Task<IoTDevice?> GetByIdWithProductionLineAsync(int deviceId, CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Include(d => d.ProductionLine)
+                .FirstOrDefaultAsync(d => d.Id == deviceId, cancellationToken);
+        }
     }
 }

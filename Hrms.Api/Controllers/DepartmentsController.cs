@@ -53,7 +53,7 @@ namespace Hrms.Api.Controllers
         /// POST /api/departments
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult<DepartmentDTO>> CreateDepartment([FromBody] CreateDepartmentCommand command)
         {
             try
@@ -72,7 +72,7 @@ namespace Hrms.Api.Controllers
         /// PUT /api/departments/{id}
         /// </summary>
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult<DepartmentDTO>> UpdateDepartment(int id, [FromBody] UpdateDepartmentCommand command)
         {
             if (id != command.Id)
@@ -97,7 +97,7 @@ namespace Hrms.Api.Controllers
         /// DELETE /api/departments/{id}
         /// </summary>
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult> DeleteDepartment(int id)
         {
             try

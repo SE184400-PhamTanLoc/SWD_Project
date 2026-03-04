@@ -23,6 +23,7 @@ namespace Hrms.Application.Features.Attendance.Commands
         private readonly IShiftAssignmentRepository _shiftAssignmentRepository;
         private readonly IAttendanceRecordRepository _attendanceRecordRepository;
         private readonly IAttendanceSummaryRepository _attendanceSummaryRepository;
+        private readonly IIoTDeviceRepository _iotDeviceRepository;
         private readonly ISystemLogRepository _systemLogRepository;
         private readonly ILogger<CheckInCommandHandler> _logger;
 
@@ -31,6 +32,7 @@ namespace Hrms.Application.Features.Attendance.Commands
             IShiftAssignmentRepository shiftAssignmentRepository,
             IAttendanceRecordRepository attendanceRecordRepository,
             IAttendanceSummaryRepository attendanceSummaryRepository,
+            IIoTDeviceRepository iotDeviceRepository,
             ISystemLogRepository systemLogRepository,
             ILogger<CheckInCommandHandler> logger)
         {
@@ -38,6 +40,7 @@ namespace Hrms.Application.Features.Attendance.Commands
             _shiftAssignmentRepository = shiftAssignmentRepository;
             _attendanceRecordRepository = attendanceRecordRepository;
             _attendanceSummaryRepository = attendanceSummaryRepository;
+            _iotDeviceRepository = iotDeviceRepository;
             _systemLogRepository = systemLogRepository;
             _logger = logger;
         }
@@ -69,7 +72,33 @@ namespace Hrms.Application.Features.Attendance.Commands
                 };
             }
 
+            // 2.1 Kiểm tra Vị trí (Location Verification)
+            if (currentShiftAssignment.ProductionLineId.HasValue)
+            {
+                IoTDevice? device = null;
+                if (int.TryParse(request.DeviceId, out var deviceIdInt))
+                {
+                    device = await _iotDeviceRepository.GetByIdWithProductionLineAsync(deviceIdInt, cancellationToken);
+                }
+
+                if (device != null && device.LineId != currentShiftAssignment.ProductionLineId)
+                {
+                    _logger.LogWarning("Wrong Location check-in: Employee {EmployeeCode} assigned to {AssignedLine}, but checking in at {DeviceLine}",
+                        employee.EmployeeCode, currentShiftAssignment.ProductionLine?.LineName, device.ProductionLine?.LineName ?? "Unknown");
+
+                    return new CheckInResponseDto
+                    {
+                        Success = false,
+                        Message = $"Sai địa điểm! Bạn được phân công tại: {currentShiftAssignment.ProductionLine?.LineName ?? "Dây chuyền " + currentShiftAssignment.ProductionLineId}. " +
+                                  $"Máy quét này thuộc: {device.ProductionLine?.LineName ?? "Dây chuyền khác"}",
+                        CheckInTime = checkInTime,
+                        Status = "WrongLocation"
+                    };
+                }
+            }
+
             var shift = currentShiftAssignment.Shift;
+            var shiftId = shift.Id;
 
             // 3. Kiểm tra đã check-in chưa (tránh duplicate)
             var existingRecord = await _attendanceRecordRepository.GetByEmployeeAndDateAsync(

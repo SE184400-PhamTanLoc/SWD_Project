@@ -28,7 +28,7 @@ namespace Hrms.Api.Controllers
         /// POST /api/iot-devices/register
         /// </summary>
         [HttpPost("register")]
-        [Authorize(Roles = "Admin,HR")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
         public async Task<ActionResult> RegisterDevice([FromBody] RegisterDeviceCommand command)
         {
             try
@@ -37,6 +37,34 @@ namespace Hrms.Api.Controllers
                 return Ok(new { deviceId, message = "Device registered successfully" });
             }
             catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật IoT Device
+        /// PUT /api/iot-devices/{id}
+        /// </summary>
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,HR,Administrator")]
+        public async Task<ActionResult> UpdateDevice(int id, [FromBody] UpdateIoTDeviceCommand command)
+        {
+            if (id != command.Id)
+            {
+                return BadRequest(new { message = "ID mismatch" });
+            }
+
+            try
+            {
+                await _mediator.Send(command);
+                return Ok(new { message = "Device updated successfully" });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
