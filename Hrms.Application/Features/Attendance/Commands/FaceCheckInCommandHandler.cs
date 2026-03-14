@@ -41,6 +41,7 @@ namespace Hrms.Application.Features.Attendance.Commands
         public async Task<FaceCheckInResponseDto> Handle(FaceCheckInCommand request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Processing face check-in from device: {DeviceId}", request.DeviceId);
+            _logger.LogInformation("ImageBase64 length received: {Length}", request.ImageBase64?.Length ?? 0);
 
             // 1. Validate device exists
             IoTDevice? device = null;
@@ -48,8 +49,23 @@ namespace Hrms.Application.Features.Attendance.Commands
             {
                 device = await _iotDeviceRepository.GetByIdWithProductionLineAsync(deviceIdInt, cancellationToken);
             }
-
+            else
+            {
+                // Nếu là string như "esp32cam-01", tìm bằng DeviceName thay vì ID số.
+                var allDevices = await _iotDeviceRepository.GetAllAsync(cancellationToken);
+                device = allDevices.FirstOrDefault(d => 
+                    string.Equals(d.DeviceName, request.DeviceId, StringComparison.OrdinalIgnoreCase));
+                    
+                if (device != null)
+                {
+                    // Nạp luôn ProductionLine nếu tìm thấy bằng Name
+                    device = await _iotDeviceRepository.GetByIdWithProductionLineAsync(device.Id, cancellationToken);
+                    _logger.LogInformation("Found device by Name: {DeviceName}, ID: {Id}", device?.DeviceName, device?.Id);
+                }
+            }
+            
             // 2. Gọi Python AI Service để nhận diện khuôn mặt
+            _logger.LogInformation("Attempting to call Python AI Service for device: {DeviceId}", request.DeviceId);
             var recognizeResult = await _pythonAIService.RecognizeFaceAsync(
                 request.DeviceId, 
                 request.ImageBase64, 
@@ -67,7 +83,7 @@ namespace Hrms.Application.Features.Attendance.Commands
 
             try
             {
-                // 4. Kiểm tra kết quả từ Python AI
+                // 4. Kiểm tra lỗi hệ thống từ AI
                 if (!recognizeResult.Ok)
                 {
                     deviceLog.ProcessingResult = "Failed";
@@ -80,12 +96,12 @@ namespace Hrms.Application.Features.Attendance.Commands
                     return new FaceCheckInResponseDto
                     {
                         Success = false,
-                        Message = "Lỗi khi nhận diện khuôn mặt",
+                        Message = "Lỗi dịch vụ nhận diện khuôn mặt",
                         Status = "Failed"
                     };
                 }
 
-                // 5. Kiểm tra decision
+                // 5. Kiểm tra quyết định nhận diện (accept/reject)
                 if (recognizeResult.Decision != "accept")
                 {
                     deviceLog.ProcessingResult = "Rejected";
@@ -95,10 +111,26 @@ namespace Hrms.Application.Features.Attendance.Commands
 
                     _logger.LogInformation("Face not recognized. Reason: {Reason}", recognizeResult.Reason);
 
+                    string friendlyMessage = "Không nhận diện được khuôn mặt";
+                    if (recognizeResult.Reason == "REQUIRE_EXACTLY_ONE_FACE")
+                    {
+                        friendlyMessage = recognizeResult.FaceCount == 0 
+                            ? "Không tìm thấy khuôn mặt trong ảnh" 
+                            : "Phát hiện quá nhiều khuôn mặt, hãy thử lại";
+                    }
+                    else if (recognizeResult.Reason == "LOW_CONFIDENCE")
+                    {
+                        friendlyMessage = "Khuôn mặt lạ hoặc chưa được đăng ký";
+                    }
+                    else if (recognizeResult.Reason == "EMPTY_GALLERY")
+                    {
+                        friendlyMessage = "Hệ thống chưa có dữ liệu mẫu khuôn mặt";
+                    }
+
                     return new FaceCheckInResponseDto
                     {
                         Success = false,
-                        Message = "Không nhận diện được khuôn mặt",
+                        Message = friendlyMessage,
                         Status = "UnknownFace",
                         Confidence = recognizeResult.Confidence
                     };
@@ -143,32 +175,84 @@ namespace Hrms.Application.Features.Attendance.Commands
                 deviceLog.EmployeeId = employee.Id;
                 deviceLog.Confidence = recognizeResult.Confidence;
 
-                // 7. Kiểm tra đã check-in hôm nay chưa
-                var today = DateTime.Today;
-                
+                // 7. Kiểm tra ca làm việc hôm nay
+                // Chuyển đổi CapturedAt từ UTC sang múi giờ Việt Nam (UTC+7)
+                var tzInfo = TimeZoneInfo.FindSystemTimeZoneById(
+                    Environment.OSVersion.Platform == PlatformID.Win32NT ? "SE Asia Standard Time" : "Asia/Ho_Chi_Minh");
+                var now = TimeZoneInfo.ConvertTimeFromUtc(request.CapturedAt, tzInfo);
+                var today = now.Date;
+
                 // Lấy ShiftAssignment để kiểm tra Location (ProductionLine) + Shift info
                 var shiftAssignment = await _shiftAssignmentRepository.GetCurrentShiftAssignmentAsync(
                     employee.Id, today, cancellationToken);
 
-                // --- LOGIC KIỂM TRA LOCATION ---
-                // Nếu ShiftAssignment có gán ProductionLine, check xem Device có thuộc Line đó không
-                if (shiftAssignment?.ProductionLineId.HasValue == true)
+                // --- LOGIC KIỂM TRA NGHIÊM NGẶT ---
+                
+                // A. Kiểm tra có ca làm việc hôm nay không
+                if (shiftAssignment == null)
                 {
-                    if (device != null && device.LineId != shiftAssignment.ProductionLineId)
+                    deviceLog.ProcessingResult = "NoShiftToday";
+                    deviceLog.ErrorMessage = $"No shift assigned for today: {today:yyyy-MM-dd}";
+                    await _deviceLogRepository.AddAsync(deviceLog, cancellationToken);
+                    await _deviceLogRepository.SaveChangesAsync(cancellationToken);
+
+                    _logger.LogWarning("Employee {EmployeeCode} has no shift assigned for today", employee.EmployeeCode);
+
+                    return new FaceCheckInResponseDto
                     {
-                        deviceLog.ProcessingResult = "WrongLocation";
-                        deviceLog.ErrorMessage = $"Wrong Location. Assigned: {shiftAssignment.ProductionLine?.LineName}, Device at: {device.ProductionLine?.LineName ?? "Unknown"}";
+                        Success = false,
+                        Message = "Bạn không có ca làm việc được phân công hôm nay.",
+                        Status = "NoShiftToday",
+                        Confidence = recognizeResult.Confidence
+                    };
+                }
+
+                // B. Kiểm tra địa điểm (Dây chuyền)
+                // Phải đúng ProductionLine đã gán
+                if (device == null || device.LineId != shiftAssignment.ProductionLineId)
+                {
+                    deviceLog.ProcessingResult = "WrongLocation";
+                    deviceLog.ErrorMessage = $"Wrong Location. Assigned: {shiftAssignment.ProductionLine?.LineName ?? "Line " + shiftAssignment.ProductionLineId}, Device at: {device?.ProductionLine?.LineName ?? "Unknown"}";
+                    await _deviceLogRepository.AddAsync(deviceLog, cancellationToken);
+                    await _deviceLogRepository.SaveChangesAsync(cancellationToken);
+
+                    _logger.LogWarning("Employee {EmployeeCode} check-in at wrong location. Assigned: {Assigned}, Device: {DeviceLine}",
+                        employee.EmployeeCode, shiftAssignment.ProductionLine?.LineName, device?.ProductionLine?.LineName);
+
+                    return new FaceCheckInResponseDto
+                    {
+                        Success = false,
+                        Message = $"Sai địa điểm! Bạn được phân công tại: {shiftAssignment.ProductionLine?.LineName ?? "Dây chuyền assigned"}",
+                        Status = "WrongLocation",
+                        Confidence = recognizeResult.Confidence
+                    };
+                }
+
+                // C. Kiểm tra khung giờ ca làm việc (Cho phép 2h trước Start và 1h sau End)
+                if (shiftAssignment.Shift != null)
+                {
+                    var shiftStart = today.Add(shiftAssignment.Shift.StartTime);
+                    var shiftEnd = today.Add(shiftAssignment.Shift.EndTime);
+                    
+                    // Nếu ca làm kéo dài qua đêm (ví dụ 22h - 06h sáng hôm sau) - Giả định đơn giản ca trong ngày
+                    var validStart = shiftStart.AddHours(-2);
+                    var validEnd = shiftEnd.AddHours(1);
+
+                    if (now < validStart || now > validEnd)
+                    {
+                        deviceLog.ProcessingResult = "WrongShiftTime";
+                        deviceLog.ErrorMessage = $"Outside shift window. Shift: {shiftAssignment.Shift.StartTime}-{shiftAssignment.Shift.EndTime}, Captured: {now:HH:mm}";
                         await _deviceLogRepository.AddAsync(deviceLog, cancellationToken);
                         await _deviceLogRepository.SaveChangesAsync(cancellationToken);
 
-                        _logger.LogWarning("Employee {EmployeeCode} check-in at wrong location. Assigned: {Assigned}, Device: {DeviceLine}",
-                            employee.EmployeeCode, shiftAssignment.ProductionLine?.LineName, device.ProductionLine?.LineName);
+                        _logger.LogWarning("Employee {EmployeeCode} check-in at wrong time. Shift: {Start}-{End}, Current: {Now}",
+                            employee.EmployeeCode, shiftAssignment.Shift.StartTime, shiftAssignment.Shift.EndTime, now);
 
                         return new FaceCheckInResponseDto
                         {
                             Success = false,
-                            Message = $"Sai địa điểm! Bạn được phân công tại: {shiftAssignment.ProductionLine?.LineName}",
-                            Status = "WrongLocation",
+                            Message = $"Sai khung giờ! Ca của bạn: {shiftAssignment.Shift.StartTime:hh\\:mm} - {shiftAssignment.Shift.EndTime:hh\\:mm}",
+                            Status = "WrongShiftTime",
                             Confidence = recognizeResult.Confidence
                         };
                     }

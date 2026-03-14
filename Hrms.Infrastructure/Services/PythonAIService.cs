@@ -47,7 +47,7 @@ namespace Hrms.Infrastructure.Services
 
                 _logger.LogInformation("Enrolling face for person_id: {PersonId}, name: {Name}", personId, name);
 
-                var response = await httpClient.PostAsync("/api/enroll", content, cancellationToken);
+                var response = await httpClient.PostAsync("api/enroll", content, cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 _logger.LogDebug("Python AI enroll response: {Response}", responseContent);
@@ -108,12 +108,18 @@ namespace Hrms.Infrastructure.Services
                 imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
                 content.Add(imageContent, "image", "capture.jpg");
 
-                _logger.LogInformation("Recognizing face for device_id: {DeviceId}", deviceId ?? "N/A");
+                _logger.LogInformation("[BE -> Python] Đang gửi yêu cầu nhận diện cho thiết bị: {DeviceId}", deviceId ?? "N/A");
+                _logger.LogInformation("[BE -> Python] URL mục tiêu: {Url}", httpClient.BaseAddress + "api/recognize_face");
 
-                var response = await httpClient.PostAsync("/api/recognize_face", content, cancellationToken);
+                var startTime = DateTime.Now;
+                var response = await httpClient.PostAsync("api/recognize_face", content, cancellationToken);
+                var duration = DateTime.Now - startTime;
+                
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
-                _logger.LogDebug("Python AI recognize response: {Response}", responseContent);
+                _logger.LogInformation("[Python -> BE] Nhận phản hồi sau {Duration}ms. Status: {Status}", 
+                    (int)duration.TotalMilliseconds, response.StatusCode);
+                _logger.LogDebug("[Python -> BE] Nội dung: {Response}", responseContent);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -152,7 +158,7 @@ namespace Hrms.Infrastructure.Services
             try
             {
                 var httpClient = _httpClientFactory.CreateClient("PythonAIService");
-                var response = await httpClient.GetAsync($"/api/get_images/{personId}", cancellationToken);
+                var response = await httpClient.GetAsync($"api/get_images/{personId}", cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)

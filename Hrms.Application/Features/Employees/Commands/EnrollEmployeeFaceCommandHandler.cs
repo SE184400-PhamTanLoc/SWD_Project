@@ -58,11 +58,18 @@ namespace Hrms.Application.Features.Employees.Commands
             {
                 _logger.LogError("Python AI enrollment failed for employee {EmployeeCode}: {Reason}", 
                     employee.EmployeeCode, enrollResult.Reason);
- 
+
+                string friendlyMessage = enrollResult.Reason switch
+                {
+                    "REQUIRE_EXACTLY_ONE_FACE" => "Yêu cầu chính xác 1 khuôn mặt trong ảnh (không tìm thấy hoặc có quá nhiều mặt)",
+                    "INVALID_IMAGE" => "Dữ liệu hình ảnh không hợp lệ hoặc bị lỗi",
+                    _ => enrollResult.Reason ?? "Lỗi khi đăng ký khuôn mặt"
+                };
+
                 return new EnrollEmployeeFaceResponseDto
                 {
                     Success = false,
-                    Message = enrollResult.Reason ?? "Lỗi khi đăng ký khuôn mặt",
+                    Message = friendlyMessage,
                     EmployeeCode = employee.EmployeeCode,
                     EmployeeName = employee.FullName
                 };

@@ -108,13 +108,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// HttpClient - Đăng ký HttpClient để gọi Python AI Service
-builder.Services.AddHttpClient("PythonAIService", client =>
-{
-    var pythonServiceUrl = configuration["PythonAIService:BaseUrl"] ?? "http://localhost:5000";
-    client.BaseAddress = new Uri(pythonServiceUrl);
-    client.Timeout = TimeSpan.FromSeconds(30);
-});
+// HttpClient đã được đăng ký trong InfrastructureDI
 
 var app = builder.Build();
 

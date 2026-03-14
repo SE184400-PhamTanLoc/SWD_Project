@@ -171,5 +171,15 @@ namespace Hrms.Api.Controllers
             }
             return Ok(shift);
         }
+        /// <summary>
+        /// Lấy danh sách shift assignments
+        /// GET /api/shifts/assignments
+        /// </summary>
+        [HttpGet("assignments")]
+        public async Task<ActionResult> GetShiftAssignments()
+        {
+            var assignments = await _mediator.Send(new GetAllShiftAssignmentsQuery());
+            return Ok(assignments);
+        }
     }
 }

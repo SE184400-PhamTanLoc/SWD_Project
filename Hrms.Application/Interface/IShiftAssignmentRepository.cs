@@ -42,5 +42,9 @@ namespace Hrms.Application.Interface
             DateTime toDate, 
             Guid excludeId,
             CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Lấy tất cả shift assignments bao gồm thông tin chi tiết (Employee, Shift, ProductionLine)
+        /// </summary>
+        Task<IEnumerable<ShiftAssignment>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default);
     }
 }
