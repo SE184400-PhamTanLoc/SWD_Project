@@ -66,5 +66,13 @@ namespace Hrms.Infrastructure.Repositories
                 && sa.FromDate <= toDate
                 && sa.ToDate >= fromDate, cancellationToken);
         }
+        public async Task<IEnumerable<ShiftAssignment>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbSet
+                .Include(sa => sa.Employee)
+                .Include(sa => sa.Shift)
+                .Include(sa => sa.ProductionLine)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

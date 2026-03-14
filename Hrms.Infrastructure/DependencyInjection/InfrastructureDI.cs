@@ -45,6 +45,22 @@ namespace Hrms.Infrastructure.DependencyInjection
             services.AddScoped<IAttendanceDeviceLogRepository, AttendanceDeviceLogRepository>();
 
             // ========== SERVICES ==========
+            // Đăng ký HttpClient
+            services.AddHttpClient();
+            
+            // Cấu hình named client cho Python AI Service
+            services.AddHttpClient("PythonAIService", client =>
+            {
+                var baseUrl = configuration["PythonAIService:BaseUrl"] ?? "http://localhost:8000";
+                if (!baseUrl.EndsWith("/")) baseUrl += "/";
+                client.BaseAddress = new Uri(baseUrl);
+                
+                var timeoutSeconds = configuration.GetValue<int>("PythonAIService:TimeoutSeconds", 30);
+                client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
+                
+                client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            });
+
             // Đăng ký PythonAIService
             services.AddScoped<IPythonAIService, Services.PythonAIService>();
 

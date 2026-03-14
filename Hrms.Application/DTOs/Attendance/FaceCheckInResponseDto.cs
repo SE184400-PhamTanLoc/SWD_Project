@@ -26,7 +26,7 @@ namespace Hrms.Application.DTOs.Attendance
         public DateTime? CheckInTime { get; set; }
 
         /// <summary>
-        /// Trạng thái chi tiết: "CheckedIn", "AlreadyCheckedIn", "CheckedOut", "Failed", "UnknownFace"
+        /// Trạng thái chi tiết: "CheckedIn", "AlreadyCheckedIn", "CheckedOut", "Failed", "UnknownFace", "NoShiftToday", "WrongShiftTime", "WrongLocation"
         /// </summary>
         public string Status { get; set; } = string.Empty;
 
