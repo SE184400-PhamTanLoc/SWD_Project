@@ -54,5 +54,14 @@ export const shiftApi = {
         } catch (error) {
             throw error;
         }
+    },
+
+    async getAllAssignments(): Promise<ShiftAssignment[]> {
+        try {
+            const response = await axiosClient.get<any, ShiftAssignment[]>(API_ENDPOINTS.SHIFT_ASSIGNMENTS);
+            return response;
+        } catch (error) {
+            throw error;
+        }
     }
 };

@@ -11,5 +11,7 @@ export type AppStackParamList = {
     AddProductionLine: undefined;
     ShiftList: undefined;
     AddShift: undefined;
+    ShiftAssignmentList: undefined;
+    AddShiftAssignment: undefined;
     AttendanceCheckIn: undefined;
 };

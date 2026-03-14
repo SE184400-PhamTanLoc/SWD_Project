@@ -1,13 +1,5 @@
+import { ProductionLine } from "../types/api.types";
 import axiosClient from "./axiosClient";
-
-export interface ProductionLine {
-    id: number;
-    lineName: string;
-    departmentId: number;
-    capacity?: number;
-    machineCount?: number;
-    status: string;
-}
 
 export const productionLineApi = {
     async getProductionLines(): Promise<ProductionLine[]> {

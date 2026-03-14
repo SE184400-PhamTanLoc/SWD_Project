@@ -5,22 +5,24 @@
 
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+
+import * as FileSystem from "expo-file-system/legacy";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Dimensions,
-    SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { WebView } from "react-native-webview";
 import CustomAlert from "../components/CustomAlert";
 import { AuthStackParamList } from "../types/AuthParam";
-import { CAMERA_STREAM_PORT } from "../utils/constants";
 
 const { width, height } = Dimensions.get("window");
 
@@ -33,6 +35,13 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
     const [discovering, setDiscovering] = useState(true);
     const [capturing, setCapturing] = useState(false);
     const [webViewKey, setWebViewKey] = useState(0);
+    const [debugLogs, setDebugLogs] = useState<string[]>([]);
+
+    const addLog = (msg: string) => {
+        const time = new Date().toLocaleTimeString();
+        setDebugLogs(prev => [`[${time}] ${msg}`, ...prev].slice(0, 5));
+        console.log(`[DEBUG] ${msg}`);
+    };
 
     const [alert, setAlert] = useState({
         visible: false,
@@ -57,7 +66,7 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
     const discoverCamera = async () => {
         setDiscovering(true);
 
-        const hosts = ["10.0.2.2", "10.159.86.141", "192.168.1.7", "192.168.1.9"]; // Add your PC IP as a persistent candidate
+        const hosts = ["192.168.1.9", "10.0.2.2"]; // Ưu tiên IP server và camera thực tế
 
         for (const host of hosts) {
             try {
@@ -65,60 +74,73 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
                 if (response.ok) {
                     const data = await response.json();
                     if (data.ok && data.ip) {
-                        setCameraIP(data.ip);
-                        setServerIP(host); // Save the server that actually responded
-                        setStreamURL(`http://${data.ip}:${CAMERA_STREAM_PORT}/stream`);
+                        // NẾU server trả về IP cũ, hãy ghi đè bằng IP camera thực tế 192.168.1.11
+                        const finalCameraIP = (data.ip === "10.159.86.166" || data.ip === "0.0.0.0") ? "192.168.1.11" : data.ip;
+                        setCameraIP(finalCameraIP);
+                        setServerIP(host);
+                        // Sửa lỗi: Cổng camera stream có thể khác với data.port nếu bị thiếu, ta dùng PORT 81 theo thông báo
+                        setStreamURL(`http://${finalCameraIP}:81/stream`);
+                        setWebViewKey(prev => prev + 1); // Force WebView reload
                         setDiscovering(false);
                         return;
                     }
                 }
             } catch (e) {
-                // Try next host
+                // Thử host tiếp theo
             }
         }
 
-        // Fallback to defaults
+        // Giá trị dự phòng (fallback)
         setTimeout(() => {
-            const fallbackCamera = "10.159.86.166";
-            const fallbackServer = "10.0.2.2";
+            const fallbackCamera = "192.168.1.11";
+            const fallbackServer = "192.168.1.9";
             setCameraIP(fallbackCamera);
             setServerIP(fallbackServer);
-            setStreamURL(`http://${fallbackCamera}:${CAMERA_STREAM_PORT}/stream`);
+            setStreamURL(`http://${fallbackCamera}:81/stream`);
+            setWebViewKey(prev => prev + 1); // Force WebView reload
             setDiscovering(false);
         }, 1000);
     };
 
     const handleCapture = async () => {
-        // Double check we have IPs, if not, use last known or defaults
-        const currentCameraIP = cameraIP || "10.159.86.166";
-        const currentServerIP = serverIP || "10.0.2.2";
+        const currentCameraIP = cameraIP && cameraIP !== "10.159.86.166" ? cameraIP : "192.168.1.11";
+        const currentServerIP = serverIP || "192.168.1.9";
 
         setCapturing(true);
+        const controller = new AbortController();
+
+        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 seconds timeout
 
         try {
-            // Step 1: Capture RAW image from ESP32 camera
+            // Bước 1: Chụp ảnh từ ESP32 camera và tải về bộ nhớ đệm điện thoại
+            // Sửa port mặc định thành port 80 (hoặc port của webserver, nếu vẫn lỗi thử bỏ qua http://)
             const captureUrl = `http://${currentCameraIP}/capture`;
-            console.log("Capturing from:", captureUrl);
+            const localUri = `${FileSystem.cacheDirectory}capture.jpg`;
 
-            const response = await fetch(captureUrl);
-            if (!response.ok) {
-                throw new Error("Failed to capture image from camera");
+            addLog(`Downloading image from camera: ${captureUrl}`);
+            const downloadResult = await FileSystem.downloadAsync(captureUrl, localUri);
+
+            if (downloadResult.status !== 200) {
+                addLog(`Download error: ${downloadResult.status}`);
+                throw new Error(`Cannot get image from camera (Status: ${downloadResult.status})`);
             }
+            addLog("Image downloaded successfully, preparing data...");
 
-            const blob = await response.blob();
-
-            // Step 2: Prepare FormData for .NET backend
+            // Bước 2: Chuẩn bị FormData với file thực tế từ máy điện thoại
             const formData = new FormData();
             formData.append("File", {
-                uri: captureUrl,
+                uri: downloadResult.uri,
                 type: "image/jpeg",
                 name: "capture.jpg",
             } as any);
-            formData.append("DeviceId", "esp32cam-01");
+            formData.append("DeviceId", "ESP32-CAM-02");
 
-            // Step 3: Call .NET backend directly
-            const netUrl = `http://${currentServerIP}:5028/api/Attendance/face-checkin`;
-            console.log("Uploading to .NET:", netUrl);
+            // Bước 3: Gửi tới .NET backend
+            // Nếu dùng Emulator, 10.0.2.2 trỏ về localhost của máy tính (nơi chạy BE)
+            const beHost = (currentServerIP === "192.168.1.9" || currentServerIP === "10.24.55.141") ? "10.0.2.2" : currentServerIP;
+            const netUrl = `http://${beHost}:5028/api/Attendance/face-checkin`;
+
+            addLog(`Sending image to backend: ${netUrl}`);
 
             const attendanceResponse = await fetch(netUrl, {
                 method: "POST",
@@ -126,7 +148,11 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
                 headers: {
                     "Accept": "application/json",
                 },
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
+            addLog(`Backend responded: ${attendanceResponse.status}`);
 
             if (!attendanceResponse.ok) {
                 const errorText = await attendanceResponse.text();
@@ -156,7 +182,7 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
                 if (status === "CheckedIn") {
                     setAlert({
                         visible: true,
-                        title: `Welcome, ${employeeName}! 👋`,
+                        title: `Hello ${employeeName}! 👋`,
                         message: `Check-in successful!\n\nTime: ${formattedTime}\nConfidence: ${confidence?.toFixed(1)}%`,
                         type: "success",
                         onConfirm: undefined,
@@ -164,8 +190,8 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
                 } else if (status === "CheckedOut") {
                     setAlert({
                         visible: true,
-                        title: `Goodbye, ${employeeName}! 👋`,
-                        message: `Check-out successful!\n\nTime: ${formattedTime}\nConfidence: ${confidence?.toFixed(1)}%\n\nSee you tomorrow!`,
+                        title: `Goodbye ${employeeName}! 👋`,
+                        message: `Check-out successful!\n\nTime: ${formattedTime}\nConfidence: ${confidence?.toFixed(1)}%\n\nSee you next time!`,
                         type: "success",
                         onConfirm: undefined,
                     });
@@ -186,34 +212,68 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
                     setAlert({
                         visible: true,
                         title: "Face Not Recognized",
-                        message: "Your face was not recognized. Please contact admin.",
+                        message: "Your face is not registered or not clear. Please try again.",
                         type: "error",
                         onConfirm: undefined,
                     });
                 } else if (status === "AlreadyCheckedOut") {
                     setAlert({
                         visible: true,
-                        title: "Already Checked Out",
-                        message: message || "You've already checked out today.",
+                        title: "Already Checked-out",
+                        message: "You have already checked out for today.",
                         type: "info",
+                        onConfirm: undefined,
+                    });
+                } else if (status === "NoShiftToday") {
+                    setAlert({
+                        visible: true,
+                        title: "No Shift Today",
+                        message: "You do not have any shift assigned for today.",
+                        type: "error",
+                        onConfirm: undefined,
+                    });
+                } else if (status === "WrongShiftTime") {
+                    setAlert({
+                        visible: true,
+                        title: "Wrong Time",
+                        message: "It is currently not your working time.",
+                        type: "error",
+                        onConfirm: undefined,
+                    });
+                } else if (status === "WrongLocation") {
+                    setAlert({
+                        visible: true,
+                        title: "Wrong Location",
+                        message: "You are checking in at the wrong production line.",
+                        type: "error",
                         onConfirm: undefined,
                     });
                 } else {
                     setAlert({
                         visible: true,
-                        title: "Process Failed",
-                        message: message || "Failed to process attendance.",
+                        title: "Processing Failed",
+                        message: "Failed to process attendance data.",
                         type: "error",
                         onConfirm: undefined,
                     });
                 }
             }
         } catch (error: any) {
-            console.error("Capture Error:", error);
+            clearTimeout(timeoutId);
+            console.error("Capture Error Detail:", error);
+
+            let errorMessage = error.message;
+            let errorTitle = "Connection Error";
+
+            if (error.name === 'AbortError') {
+                errorTitle = "Timeout";
+                errorMessage = "Server did not respond within 25 seconds. Please check your network or server.";
+            }
+
             setAlert({
                 visible: true,
-                title: "Capture Failed",
-                message: error.message || "Failed to communicate with camera or server.",
+                title: errorTitle,
+                message: `Error: ${errorMessage}\n\nPlease check your Wi-Fi or Server IP: ${currentServerIP}`,
                 type: "error",
                 onConfirm: undefined,
             });
@@ -267,13 +327,31 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
                                 {streamURL ? (
                                     <WebView
                                         key={webViewKey}
-                                        source={{ uri: streamURL }}
+                                        source={{
+                                            html: `
+                                                <html>
+                                                    <head>
+                                                        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                                                        <style>
+                                                            body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; overflow: hidden; }
+                                                            img { width: 100%; height: auto; max-height: 100%; object-fit: contain; }
+                                                        </style>
+                                                    </head>
+                                                    <body>
+                                                        <img src="${streamURL}" style="width: 100%; height: auto;" />
+                                                    </body>
+                                                </html>
+                                            `
+                                        }}
                                         style={styles.webview}
+                                        scrollEnabled={false}
+                                        originWhitelist={["*"]}
+                                        allowsInlineMediaPlayback={true}
                                         onError={() => {
                                             setAlert({
                                                 visible: true,
                                                 title: "Stream Error",
-                                                message: "Failed to load camera stream. Please check camera connection.",
+                                                message: "Failed to load camera stream. Please check camera connection at " + streamURL,
                                                 type: "error",
                                                 onConfirm: undefined,
                                             });
@@ -321,10 +399,16 @@ export default function AttendanceCheckInScreen({ navigation }: Props) {
                             )}
 
                             <Animated.View entering={FadeInDown.delay(600).duration(600)} style={styles.instructions}>
-                                <Text style={styles.instructionTitle}>Instructions:</Text>
-                                <Text style={styles.instructionText}>• Position your face in the camera frame</Text>
-                                <Text style={styles.instructionText}>• Ensure good lighting</Text>
-                                <Text style={styles.instructionText}>• Press "Capture & Check-in" button</Text>
+                                <Text style={styles.instructionTitle}>System Status:</Text>
+                                {debugLogs.length > 0 ? (
+                                    debugLogs.map((log, i) => (
+                                        <Text key={i} style={[styles.instructionText, { color: i === 0 ? "#00F2FE" : "rgba(255,255,255,0.4)" }]}>
+                                            • {log}
+                                        </Text>
+                                    ))
+                                ) : (
+                                    <Text style={styles.instructionText}>• Waiting for capture...</Text>
+                                )}
                             </Animated.View>
 
                             <TouchableOpacity

@@ -129,7 +129,7 @@ export function AddShiftScreen({ navigation }: Props) {
                                 <View style={styles.inputContainer}>
                                     <Ionicons name="time-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
                                     <TextInput
-                                        placeholder="Hành chính"
+                                        placeholder="Office"
                                         placeholderTextColor="#999"
                                         style={styles.input}
                                         value={form.name}

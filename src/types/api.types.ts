@@ -32,6 +32,18 @@ export interface IoTDevice {
   productionLineName?: string;
 }
 
+export interface ProductionLine {
+  id: number;
+  lineCode: string;
+  lineName: string;
+  departmentId: number;
+  departmentName?: string;
+  managerId?: string | null;
+  status: string;
+  capacity?: number;
+  machineCount?: number;
+}
+
 export type Login = {
   username: string; // API yêu cầu username, không phải email
   password: string;
@@ -86,12 +98,13 @@ export interface Shift {
 export interface ShiftAssignment {
   id: string; // GUID
   employeeId: string;
+  employeeName: string;
   shiftId: string;
+  shiftName: string;
   fromDate: string;
   toDate: string;
   productionLineId?: number;
   productionLineName?: string;
-  shift?: Shift;
 }
 
 export interface FaceCheckInResponse {
@@ -99,6 +112,6 @@ export interface FaceCheckInResponse {
   message: string;
   employeeName?: string;
   checkInTime?: string;
-  status?: "CheckedIn" | "CheckedOut" | "WrongLocation" | "UnknownFace" | "AlreadyCheckedOut" | "Error";
+  status?: "CheckedIn" | "CheckedOut" | "WrongLocation" | "UnknownFace" | "AlreadyCheckedOut" | "NoShiftToday" | "WrongShiftTime" | "Error";
   confidence?: number;
 }

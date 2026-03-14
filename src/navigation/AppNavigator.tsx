@@ -4,6 +4,7 @@ import {
   AddEmployeeScreen,
   AddIoTDeviceScreen,
   AddProductionLineScreen,
+  AddShiftAssignmentScreen,
   AddShiftScreen,
   AttendanceCheckInScreen,
   DepartmentListScreen,
@@ -12,6 +13,7 @@ import {
   HomeScreen,
   IoTDeviceListScreen,
   ProductionLineListScreen,
+  ShiftAssignmentListScreen,
   ShiftListScreen,
 } from "../screens";
 import { AppStackParamList } from "../types/navigation.types";
@@ -37,6 +39,8 @@ const AppNavigator = () => {
       <Stack.Screen name="AddProductionLine" component={AddProductionLineScreen} />
       <Stack.Screen name="ShiftList" component={ShiftListScreen} />
       <Stack.Screen name="AddShift" component={AddShiftScreen} />
+      <Stack.Screen name="ShiftAssignmentList" component={ShiftAssignmentListScreen} />
+      <Stack.Screen name="AddShiftAssignment" component={AddShiftAssignmentScreen} />
       <Stack.Screen name="AttendanceCheckIn" component={AttendanceCheckInScreen} />
     </Stack.Navigator>
   );

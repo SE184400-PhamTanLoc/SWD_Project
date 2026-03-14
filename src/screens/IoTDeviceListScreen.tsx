@@ -95,6 +95,15 @@ export function IoTDeviceListScreen({ navigation }: Props) {
                             <Text style={styles.detailText}>{item.locationDesc || "Central Office"}</Text>
                         </View>
 
+                        {item.productionLineName && (
+                            <View style={styles.detailRow}>
+                                <Ionicons name="git-network-outline" size={14} color="#4FACFE" />
+                                <Text style={[styles.detailText, { color: "#4FACFE", fontWeight: "600" }]}>
+                                    LINE: {item.productionLineName}
+                                </Text>
+                            </View>
+                        )}
+
                         <View style={styles.ipRow}>
                             <Text style={styles.ipText}>NET: {item.ipAddress || "Disconnected"}</Text>
                         </View>

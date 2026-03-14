@@ -177,6 +177,18 @@ export function HomeScreen({ navigation }: Props) {
                     <Text style={styles.compactTitle}>Shifts</Text>
                     <Text style={styles.compactSub}>Scheduling</Text>
                   </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.compactCard}
+                    onPress={() => navigation.navigate("ShiftAssignmentList")}
+                    activeOpacity={0.85}
+                  >
+                    <View style={[styles.compactIcon, { backgroundColor: "rgba(118, 75, 162, 0.1)" }]}>
+                      <Ionicons name="calendar" size={22} color="#764BA2" />
+                    </View>
+                    <Text style={styles.compactTitle}>Assigns</Text>
+                    <Text style={styles.compactSub}>Shift Assignments</Text>
+                  </TouchableOpacity>
                 </Animated.View>
               </>
             )}
@@ -212,15 +224,18 @@ export function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.compactCard, { borderColor: "rgba(255, 77, 77, 0.15)" }]}
+                style={styles.logoutCard}
                 onPress={logout}
                 activeOpacity={0.85}
               >
-                <View style={[styles.compactIcon, { backgroundColor: "rgba(255, 77, 77, 0.1)" }]}>
+                <View style={[styles.compactIcon, { backgroundColor: "rgba(255, 77, 77, 0.1)", marginBottom: 0, marginRight: 15 }]}>
                   <Ionicons name="log-out" size={22} color="#FF4D4D" />
                 </View>
-                <Text style={[styles.compactTitle, { color: "#FF4D4D" }]}>Logout</Text>
-                <Text style={styles.compactSub}>Sign out</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.compactTitle, { color: "#FF4D4D" }]}>Logout</Text>
+                  <Text style={styles.compactSub}>Sign out securely</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="rgba(255, 77, 77, 0.5)" />
               </TouchableOpacity>
             </Animated.View>
 
@@ -408,13 +423,12 @@ const styles = StyleSheet.create({
 
   // ─── Section Title ───
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#AAA",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    marginBottom: 14,
-    marginTop: 10,
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1A1A1A", // Darker for better visibility
+    letterSpacing: 1,
+    marginBottom: 16,
+    marginTop: 15,
   },
 
   // ─── Primary Card ───
@@ -458,25 +472,43 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 
-  // ─── Compact Cards (3-column) ───
+  // ─── Compact Cards (2-column grids) ───
   compactRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 5,
   },
   compactCard: {
-    flex: 1,
+    width: "48%",
     backgroundColor: "white",
     borderRadius: 18,
-    paddingVertical: 18,
-    paddingHorizontal: 6,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
     alignItems: "center",
-    marginHorizontal: 5,
+    marginBottom: 15,
     borderWidth: 1,
     borderColor: "#ECECEC",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  logoutCard: {
+    flexDirection: "row",
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 18,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "rgba(255, 77, 77, 0.15)",
+    shadowColor: "#FF4D4D",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 2,
   },

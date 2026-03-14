@@ -2,6 +2,7 @@ export { AddDepartmentScreen } from "./AddDepartmentScreen";
 export { AddEmployeeScreen } from "./AddEmployeeScreen";
 export { AddIoTDeviceScreen } from "./AddIoTDeviceScreen";
 export { AddProductionLineScreen } from "./AddProductionLineScreen";
+export { AddShiftAssignmentScreen } from "./AddShiftAssignmentScreen";
 export { AddShiftScreen } from "./AddShiftScreen";
 export { default as AttendanceCheckInScreen } from "./AttendanceCheckInScreen";
 export { DepartmentListScreen } from "./DepartmentListScreen";
@@ -12,5 +13,6 @@ export { IoTDeviceListScreen } from "./IoTDeviceListScreen";
 export { default as LoginScreen } from "./LoginScreen";
 export { ProductionLineListScreen } from "./ProductionLineListScreen";
 export { default as RegisterScreen } from "./RegisterScreen";
+export { ShiftAssignmentListScreen } from "./ShiftAssignmentListScreen";
 export { ShiftListScreen } from "./ShiftListScreen";
 

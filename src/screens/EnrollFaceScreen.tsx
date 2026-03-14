@@ -212,16 +212,16 @@ export function EnrollFaceScreen({ route, navigation }: Props) {
     if (successCount === updatedImages.length) {
       setAlert({
         visible: true,
-        title: "All Faces Enrolled",
-        message: `Successfully registered ${successCount} face samples for ${employeeName}.`,
+        title: "Enrollment Successful",
+        message: `Successfully enrolled ${successCount} face samples for ${employeeName}.`,
         type: "success",
         onConfirm: () => navigation.goBack(),
       });
     } else {
       setAlert({
         visible: true,
-        title: "Enrollment Partial",
-        message: `Processed ${successCount}/${updatedImages.length} images. Some failed, please try again.`,
+        title: "Partial Enrollment",
+        message: `Processed ${successCount}/${updatedImages.length} images. Some failed (face not found), please try again.`,
         type: "info",
         onConfirm: undefined,
       });

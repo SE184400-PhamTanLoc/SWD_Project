@@ -16,17 +16,21 @@ import {
     View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { productionLineApi } from "../api/productionLine.api";
 import CustomAlert from "../components/CustomAlert";
 import { iotService } from "../service/iot.service";
+import { ProductionLine } from "../types/api.types";
 import { AppStackParamList } from "../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "AddIoTDevice">;
 
 export function AddIoTDeviceScreen({ navigation }: Props) {
     const [loading, setLoading] = useState(false);
+    const [productionLines, setProductionLines] = useState<ProductionLine[]>([]);
     const [form, setForm] = useState({
         deviceName: "",
         deviceType: "ESP32-CAM", // Default
+        lineId: "",
         locationDesc: "",
         ipAddress: "",
         macAddress: "",
@@ -39,6 +43,19 @@ export function AddIoTDeviceScreen({ navigation }: Props) {
         type: "info" as "success" | "error" | "info",
         onConfirm: undefined as (() => void) | undefined,
     });
+
+    React.useEffect(() => {
+        fetchProductionLines();
+    }, []);
+
+    const fetchProductionLines = async () => {
+        try {
+            const data = await productionLineApi.getProductionLines();
+            setProductionLines(data);
+        } catch (error) {
+            console.error("Error fetching production lines:", error);
+        }
+    };
 
     const handleInputChange = (field: string, value: string) => {
         setForm({ ...form, [field]: value });
@@ -58,7 +75,11 @@ export function AddIoTDeviceScreen({ navigation }: Props) {
 
         setLoading(true);
         try {
-            await iotService.registerDevice(form);
+            const dataToSave = {
+                ...form,
+                lineId: form.lineId ? parseInt(form.lineId) : null,
+            };
+            await iotService.registerDevice(dataToSave);
             setAlert({
                 visible: true,
                 title: "Success",
@@ -131,6 +152,47 @@ export function AddIoTDeviceScreen({ navigation }: Props) {
                                         onChangeText={(v) => handleInputChange("deviceType", v)}
                                     />
                                 </View>
+                            </View>
+
+                            {/* Production Line */}
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Production Line</Text>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectorScroll}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.selectorItem,
+                                            form.lineId === "" && styles.selectorItemActive
+                                        ]}
+                                        onPress={() => handleInputChange("lineId", "")}
+                                    >
+                                        <Text style={[
+                                            styles.selectorText,
+                                            form.lineId === "" && styles.selectorTextActive
+                                        ]}>
+                                            NONE
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {productionLines.map((line) => (
+                                        <TouchableOpacity
+                                            key={line.id}
+                                            style={[
+                                                styles.selectorItem,
+                                                form.lineId === line.id.toString() && styles.selectorItemActive
+                                            ]}
+                                            onPress={() => handleInputChange("lineId", line.id.toString())}
+                                        >
+                                            <Text style={[
+                                                styles.selectorText,
+                                                form.lineId === line.id.toString() && styles.selectorTextActive
+                                            ]}>
+                                                {line.lineName}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                                {productionLines.length === 0 && (
+                                    <Text style={styles.helperText}>No production lines found.</Text>
+                                )}
                             </View>
 
                             {/* Location */}
@@ -286,6 +348,40 @@ const styles = StyleSheet.create({
         flex: 1,
         color: "#1A1A1A",
         fontSize: 16,
+    },
+    selectorScroll: {
+        flexDirection: "row",
+        marginTop: 5,
+    },
+    selectorItem: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 15,
+        backgroundColor: "white",
+        borderWidth: 1,
+        borderColor: "#E0E0E0",
+        marginRight: 10,
+        minWidth: 80,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    selectorItemActive: {
+        borderColor: "#4FACFE",
+        backgroundColor: "rgba(79, 172, 254, 0.1)",
+    },
+    selectorText: {
+        fontSize: 14,
+        color: "#666",
+        fontWeight: "600",
+    },
+    selectorTextActive: {
+        color: "#4FACFE",
+    },
+    helperText: {
+        fontSize: 12,
+        color: "#FF4D4D",
+        marginTop: 5,
+        marginLeft: 5,
     },
     saveButton: {
         height: 64,
