@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Hrms.Application.DTOs.IoTDevice;
 using Hrms.Application.Features.IoTDevices.Commands;
 using Hrms.Application.Features.IoTDevices.Queries;
 
@@ -96,12 +97,29 @@ namespace Hrms.Api.Controllers
         /// GET /api/iot-devices
         /// </summary>
         [HttpGet]
-        [Authorize]
-        public async Task<ActionResult> GetDevices()
+        [Authorize(Roles = "Admin,Administrator,IT")]
+        public async Task<ActionResult<List<IoTDeviceMonitoringDto>>> GetDevices()
         {
-            var query = new GetIoTDevicesQuery();
+            var query = new GetIoTDevicesMonitoringQuery();
             var devices = await _mediator.Send(query);
             return Ok(devices);
+        }
+
+        /// <summary>
+        /// Lấy trạng thái của một thiết bị
+        /// GET /api/iot-devices/{id}/status
+        /// </summary>
+        [HttpGet("{id:int}/status")]
+        [Authorize(Roles = "Admin,Administrator,IT")]
+        public async Task<ActionResult<IoTDeviceStatusDto>> GetDeviceStatus(int id)
+        {
+            var result = await _mediator.Send(new GetIoTDeviceStatusQuery { DeviceId = id });
+            if (result == null)
+            {
+                return NotFound(new { message = $"Không tìm thấy thiết bị với Id = {id}" });
+            }
+
+            return Ok(result);
         }
     }
 }
