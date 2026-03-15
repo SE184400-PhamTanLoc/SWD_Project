@@ -74,6 +74,11 @@ namespace Hrms.Infrastructure.Repositories
             _dbSet.RemoveRange(entities);
         }
 
+        public virtual IQueryable<T> Query()
+        {
+            return _dbSet.AsQueryable();
+        }
+
         public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _context.SaveChangesAsync(cancellationToken);

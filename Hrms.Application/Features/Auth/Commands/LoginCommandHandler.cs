@@ -69,10 +69,10 @@ namespace Hrms.Application.Features.Auth.Commands
             }
 
             // Lấy role (theo ERD: một user chỉ có một role)
-            var roleName = user.Role.RoleName;
+            var roleCode = user.Role.RoleCode;
 
             // Tạo JWT token
-            var token = _jwtService.GenerateToken(user, new List<string> { roleName });
+            var token = _jwtService.GenerateToken(user, new List<string> { roleCode });
 
             // Cập nhật LastLogin và reset LoginAttempts
             user.LastLogin = DateTime.UtcNow;
@@ -107,7 +107,7 @@ namespace Hrms.Application.Features.Auth.Commands
                 {
                     Id = user.Id,
                     Username = user.Username,
-                    Roles = new List<string> { roleName }
+                    Roles = new List<string> { roleCode }
                 }
             };
         }

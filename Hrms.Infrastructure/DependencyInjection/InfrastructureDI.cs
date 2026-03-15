@@ -64,6 +64,9 @@ namespace Hrms.Infrastructure.DependencyInjection
             // Đăng ký PythonAIService
             services.AddScoped<IPythonAIService, Services.PythonAIService>();
 
+            // Đăng ký SignalR Service cho real-time updates
+            services.AddScoped<IAttendanceHubService, Services.AttendanceHubService>();
+
             return services;
         }
     }

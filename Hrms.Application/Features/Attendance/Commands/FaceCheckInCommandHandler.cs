@@ -27,6 +27,7 @@ namespace Hrms.Application.Features.Attendance.Commands
             IAttendanceDeviceLogRepository deviceLogRepository,
             IIoTDeviceRepository iotDeviceRepository,
             IShiftAssignmentRepository shiftAssignmentRepository,
+            IAttendanceHubService attendanceHubService,
             ILogger<FaceCheckInCommandHandler> logger)
         {
             _pythonAIService = pythonAIService;
@@ -35,8 +36,11 @@ namespace Hrms.Application.Features.Attendance.Commands
             _deviceLogRepository = deviceLogRepository;
             _iotDeviceRepository = iotDeviceRepository;
             _shiftAssignmentRepository = shiftAssignmentRepository;
+            _attendanceHubService = attendanceHubService;
             _logger = logger;
         }
+
+        private readonly IAttendanceHubService _attendanceHubService;
 
         public async Task<FaceCheckInResponseDto> Handle(FaceCheckInCommand request, CancellationToken cancellationToken)
         {
@@ -306,6 +310,9 @@ namespace Hrms.Application.Features.Attendance.Commands
                         _attendanceRecordRepository.Update(existingRecord);
                         await _attendanceRecordRepository.SaveChangesAsync(cancellationToken);
 
+                        // Phát sự kiện real-time
+                        await _attendanceHubService.NotifyAttendanceUpdatedAsync();
+
                         deviceLog.ProcessingResult = "CheckedOut";
                         await _deviceLogRepository.AddAsync(deviceLog, cancellationToken);
                         await _deviceLogRepository.SaveChangesAsync(cancellationToken);
@@ -352,6 +359,9 @@ namespace Hrms.Application.Features.Attendance.Commands
 
                 await _attendanceRecordRepository.AddAsync(newRecord, cancellationToken);
                 await _attendanceRecordRepository.SaveChangesAsync(cancellationToken);
+
+                // Phát sự kiện real-time
+                await _attendanceHubService.NotifyAttendanceUpdatedAsync();
 
                 deviceLog.ProcessingResult = "CheckedIn";
                 await _deviceLogRepository.AddAsync(deviceLog, cancellationToken);

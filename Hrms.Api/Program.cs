@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Hrms.Application.DependencyInjection;
 using Hrms.Infrastructure.DependencyInjection;
+using Hrms.Infrastructure.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,10 @@ builder.Services.AddApplicationServices();                  // MediatR, FluentVa
 // ========== API SERVICES ==========
 // Controllers
 builder.Services.AddControllers();
+
+// SignalR & Caching cho Dashboard
+builder.Services.AddSignalR();
+builder.Services.AddMemoryCache();
 
 // CORS Configuration - Cho phép ESP32-CAM và Mobile app gọi API
 builder.Services.AddCors(options =>
@@ -138,5 +143,8 @@ app.UseAuthorization();
 // app.UseExceptionHandler();
 
 app.MapControllers();
+
+// Map SignalR Hub
+app.MapHub<AttendanceHub>("/attendanceHub");
 
 app.Run();

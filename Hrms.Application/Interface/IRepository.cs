@@ -63,6 +63,11 @@ namespace Hrms.Application.Interface
         void RemoveRange(IEnumerable<T> entities);
 
         /// <summary>
+        /// Lấy IQueryable để thực hiện các truy vấn phức tạp (join, grouping, etc.)
+        /// </summary>
+        IQueryable<T> Query();
+
+        /// <summary>
         /// Lưu thay đổi
         /// </summary>
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
