@@ -73,10 +73,19 @@ export default function LoginScreen({ navigation }: Props) {
     if (formData.username.trim() === "") {
       newErrors.username = "Username is required";
       isValid = false;
+    } else if (formData.username.trim().length < 3) {
+      newErrors.username = "Username must be at least 3 characters";
+      isValid = false;
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username.trim())) {
+      newErrors.username = "Username only allows letters, numbers and _";
+      isValid = false;
     }
 
     if (formData.password.trim() === "") {
       newErrors.password = "Password is required";
+      isValid = false;
+    } else if (formData.password.trim().length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
       isValid = false;
     }
 
@@ -142,7 +151,10 @@ export default function LoginScreen({ navigation }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
       >
-        <Animated.View entering={FadeInUp.duration(1000).springify()} style={styles.header}>
+        <Animated.View
+          entering={FadeInUp.duration(1000).springify()}
+          style={styles.header}
+        >
           <View style={styles.logoContainer}>
             <LinearGradient
               colors={["#00F2FE", "#4FACFE"]}
@@ -160,7 +172,12 @@ export default function LoginScreen({ navigation }: Props) {
           style={styles.form}
         >
           <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+            <Ionicons
+              name="person-outline"
+              size={20}
+              color="#4FACFE"
+              style={styles.inputIcon}
+            />
             <TextInput
               placeholder="Username"
               value={data.username}
@@ -175,7 +192,12 @@ export default function LoginScreen({ navigation }: Props) {
           ) : null}
 
           <View style={[styles.inputContainer, { marginTop: 15 }]}>
-            <Ionicons name="lock-closed-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+            <Ionicons
+              name="lock-closed-outline"
+              size={20}
+              color="#4FACFE"
+              style={styles.inputIcon}
+            />
             <TextInput
               placeholder="Password"
               value={data.password}
@@ -222,16 +244,19 @@ export default function LoginScreen({ navigation }: Props) {
           </Animated.View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
+            <Text style={styles.footerText}>Do not have an account? </Text>
             <TouchableOpacity onPress={() => navigation.replace("Register")}>
               <Text style={styles.link}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.checkInLinkContainer}>
-            <TouchableOpacity onPress={() => navigation.navigate("AttendanceCheckIn")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("AttendanceCheckIn")}
+            >
               <Text style={styles.checkInLink}>
-                <Ionicons name="scan-outline" size={16} color="#4FACFE" /> Employee Check-in
+                <Ionicons name="scan-outline" size={16} color="#4FACFE" />{" "}
+                Employee Check-in
               </Text>
             </TouchableOpacity>
           </View>
