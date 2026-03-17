@@ -5,6 +5,9 @@ export { AddProductionLineScreen } from "./AddProductionLineScreen";
 export { AddShiftAssignmentScreen } from "./AddShiftAssignmentScreen";
 export { AddShiftScreen } from "./AddShiftScreen";
 export { default as AttendanceCheckInScreen } from "./AttendanceCheckInScreen";
+export { AttendanceDetailScreen } from "./AttendanceDetailScreen";
+export { AttendanceHistoryScreen } from "./AttendanceHistoryScreen";
+export { DashboardScreen } from "./DashboardScreen";
 export { DepartmentListScreen } from "./DepartmentListScreen";
 export { EmployeeListScreen } from "./EmployeeListScreen";
 export { EnrollFaceScreen } from "./EnrollFaceScreen";
@@ -15,4 +18,3 @@ export { ProductionLineListScreen } from "./ProductionLineListScreen";
 export { default as RegisterScreen } from "./RegisterScreen";
 export { ShiftAssignmentListScreen } from "./ShiftAssignmentListScreen";
 export { ShiftListScreen } from "./ShiftListScreen";
-

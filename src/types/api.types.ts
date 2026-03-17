@@ -112,6 +112,76 @@ export interface FaceCheckInResponse {
   message: string;
   employeeName?: string;
   checkInTime?: string;
-  status?: "CheckedIn" | "CheckedOut" | "WrongLocation" | "UnknownFace" | "AlreadyCheckedOut" | "NoShiftToday" | "WrongShiftTime" | "Error";
+  status?:
+    | "CheckedIn"
+    | "CheckedOut"
+    | "WrongLocation"
+    | "UnknownFace"
+    | "AlreadyCheckedOut"
+    | "NoShiftToday"
+    | "WrongShiftTime"
+    | "Error";
   confidence?: number;
+}
+
+// ===== DASHBOARD TYPES =====
+export interface TodayAttendanceDto {
+  date: string; // ISO 8601 date
+  totalEmployees: number;
+  present: number;
+  late: number;
+  absent: number;
+}
+
+export interface DepartmentSummaryDto {
+  department: string;
+  totalEmployees: number;
+  present: number;
+  late: number;
+}
+
+export interface ProductionLineSummaryDto {
+  productionLine: string;
+  totalEmployees: number;
+  present: number;
+  late: number;
+}
+
+// ===== ATTENDANCE TYPES =====
+export interface AttendanceHistoryDto {
+  id: string; // GUID
+  employeeName: string;
+  department: string;
+  checkInTime: string; // ISO 8601 datetime
+  status: "Present" | "Late" | "Absent" | "ExceptionPending";
+}
+
+export interface AttendanceHistoryListDto {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  data: AttendanceHistoryDto[];
+}
+
+export interface AttendanceDetailDto {
+  id: string; // GUID
+  employeeName: string;
+  workDate: string; // ISO 8601 date
+  checkInTime: string; // ISO 8601 datetime
+  checkOutTime?: string; // ISO 8601 datetime (optional)
+  lateMinutes: number;
+  totalHours: number;
+  status: "Present" | "Late" | "Absent" | "ExceptionPending";
+  source: "FaceRecognition" | "IoTDevice" | "Manual"; // Nguồn check-in
+  confidenceScore?: number;
+}
+
+export interface AttendanceQueryParams {
+  employeeId?: string; // UUID
+  departmentId?: number;
+  productionLineId?: number;
+  fromDate?: string; // ISO 8601 date
+  toDate?: string; // ISO 8601 date
+  pageNumber?: number;
+  pageSize?: number;
 }
