@@ -9,6 +9,7 @@ import {
   AttendanceDetailDto,
   AttendanceHistoryListDto,
   AttendanceQueryParams,
+  UpdateAttendancePayload,
 } from "../types/api.types";
 
 export const attendanceService = {
@@ -25,6 +26,17 @@ export const attendanceService = {
   async getAttendanceDetail(id: string): Promise<AttendanceDetailDto> {
     try {
       return await attendanceApi.getAttendanceDetail(id);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async updateAttendance(
+    id: string,
+    payload: UpdateAttendancePayload,
+  ): Promise<{ message: string }> {
+    try {
+      return await attendanceApi.updateAttendance(id, payload);
     } catch (error) {
       throw error;
     }
@@ -69,10 +81,17 @@ export const attendanceService = {
    */
   getStatusColor(status: string): string {
     switch (status) {
+      case "OnTime":
       case "Present":
         return "#10B981"; // green
       case "Late":
         return "#F59E0B"; // amber
+      case "EarlyLeave":
+        return "#EC4899"; // pink
+      case "OnLeave":
+        return "#3B82F6"; // blue
+      case "SickLeave":
+        return "#A855F7"; // violet
       case "Absent":
         return "#EF4444"; // red
       case "ExceptionPending":
@@ -87,10 +106,14 @@ export const attendanceService = {
    */
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      Present: "Có mặt",
-      Late: "Đi muộn",
-      Absent: "Vắng mặt",
-      ExceptionPending: "Chờ xử lý",
+      OnTime: "On Time",
+      Present: "Present",
+      Late: "Late",
+      EarlyLeave: "Early Leave",
+      OnLeave: "On Leave",
+      SickLeave: "Sick Leave",
+      Absent: "Absent",
+      ExceptionPending: "Pending Review",
     };
     return labels[status] || status;
   },

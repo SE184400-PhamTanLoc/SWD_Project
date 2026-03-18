@@ -23,28 +23,50 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { dashboardService } from "../service/dashboard.service";
-import { attendanceService } from "../service/attendance.service";
-import { signalRService } from "../service/signalr.service";
-import { useAuth } from "../context/AuthContext";
+import { dashboardService } from "../../service/dashboard.service";
+import { attendanceService } from "../../service/attendance.service";
+import { employeeService } from "../../service/employee.service";
+import { signalRService } from "../../service/signalr.service";
+import { useAuth } from "../../context/AuthContext";
 import {
   DepartmentSummaryDto,
   ProductionLineSummaryDto,
   TodayAttendanceDto,
-} from "../types/api.types";
-import { AppStackParamList } from "../types/navigation.types";
+} from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "Dashboard">;
 
 export function DashboardScreen({ navigation }: Props) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [today, setToday] = useState<TodayAttendanceDto | null>(null);
   const [departments, setDepartments] = useState<DepartmentSummaryDto[]>([]);
   const [productionLines, setProductionLines] = useState<
     ProductionLineSummaryDto[]
   >([]);
+  const [summaryNotice, setSummaryNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const isManagerOnly =
+    user?.roles?.includes("Manager") &&
+    !user?.roles?.some((role) =>
+      ["Admin", "HR", "Administrator"].includes(role),
+    );
+
+  const parseStatusCodeFromError = (error: any): number | undefined => {
+    const status = error?.response?.status;
+    if (typeof status === "number") return status;
+
+    const message = String(error?.message || "");
+    const match = message.match(/status code\s*(\d{3})/i);
+    if (match?.[1]) {
+      const parsed = Number.parseInt(match[1], 10);
+      if (Number.isInteger(parsed)) return parsed;
+    }
+
+    return undefined;
+  };
 
   useEffect(() => {
     loadDashboard();
@@ -80,18 +102,69 @@ export function DashboardScreen({ navigation }: Props) {
   const loadDashboard = async (showLoader = true) => {
     try {
       if (showLoader) setLoading(true);
+      setSummaryNotice(null);
 
-      const [todayData, deptData, prodLineData] = await Promise.all([
-        dashboardService.getTodayAttendance(),
+      const todayData = await dashboardService.getTodayAttendance();
+
+      const [deptResult, prodLineResult] = await Promise.allSettled([
         dashboardService.getDepartmentSummary(),
         dashboardService.getProductionLineSummary(),
       ]);
 
-      setToday(todayData);
-      setDepartments(deptData);
-      setProductionLines(prodLineData);
+      let departmentData: DepartmentSummaryDto[] = [];
+      let productionLineData: ProductionLineSummaryDto[] = [];
+      let blockedByRole = false;
+
+      if (deptResult.status === "fulfilled") {
+        departmentData = deptResult.value;
+      } else {
+        const code = parseStatusCodeFromError(deptResult.reason);
+        blockedByRole = blockedByRole || code === 401 || code === 403;
+      }
+
+      if (prodLineResult.status === "fulfilled") {
+        productionLineData = prodLineResult.value;
+      } else {
+        const code = parseStatusCodeFromError(prodLineResult.reason);
+        blockedByRole = blockedByRole || code === 401 || code === 403;
+      }
+
+      if (blockedByRole) {
+        setSummaryNotice(
+          "Your current account is not allowed to view department/production line summaries.",
+        );
+      }
+
+      // Keep total employees consistent with Home screen source.
+      let syncedTotalEmployees = todayData.totalEmployees;
+      try {
+        const employees = await employeeService.getEmployees();
+        if (employees.length > 0) {
+          syncedTotalEmployees = employees.length;
+        }
+      } catch (error) {
+        console.warn("Failed to sync employee count for dashboard", error);
+      }
+
+      const syncedAbsent = Math.max(
+        syncedTotalEmployees - todayData.present,
+        0,
+      );
+
+      setToday({
+        ...todayData,
+        totalEmployees: syncedTotalEmployees,
+        absent: syncedAbsent,
+      });
+      setDepartments(departmentData);
+      setProductionLines(productionLineData);
     } catch (error) {
       console.warn("Failed to load dashboard:", error);
+      if (isManagerOnly) {
+        setSummaryNotice(
+          "Some dashboard sections are restricted by backend role permissions for Manager.",
+        );
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -169,13 +242,13 @@ export function DashboardScreen({ navigation }: Props) {
               <View style={styles.statsRow}>
                 <StatBox
                   icon="people"
-                  label="Tổng NV"
+                  label="Total Employees"
                   value={today.totalEmployees}
                   color="#FFFFFF"
                 />
                 <StatBox
                   icon="checkmark-circle"
-                  label="Có mặt"
+                  label="Present"
                   value={today.present}
                   color="#10B981"
                 />
@@ -184,13 +257,13 @@ export function DashboardScreen({ navigation }: Props) {
               <View style={styles.statsRow}>
                 <StatBox
                   icon="time"
-                  label="Đi muộn"
+                  label="Late"
                   value={today.late}
                   color="#F59E0B"
                 />
                 <StatBox
                   icon="close-circle"
-                  label="Vắng mặt"
+                  label="Absent"
                   value={today.absent}
                   color="#EF4444"
                 />
@@ -198,7 +271,7 @@ export function DashboardScreen({ navigation }: Props) {
 
               {/* Attendance Rate */}
               <View style={styles.progressContainer}>
-                <Text style={styles.progressLabel}>Tỷ lệ có mặt</Text>
+                <Text style={styles.progressLabel}>Attendance Rate</Text>
                 <View style={styles.progressBar}>
                   <View
                     style={[
@@ -224,13 +297,22 @@ export function DashboardScreen({ navigation }: Props) {
           </Animated.View>
         )}
 
+        {summaryNotice && (
+          <Animated.View entering={FadeInUp.delay(150)}>
+            <View style={styles.noticeCard}>
+              <Ionicons name="information-circle" size={18} color="#1D4ED8" />
+              <Text style={styles.noticeText}>{summaryNotice}</Text>
+            </View>
+          </Animated.View>
+        )}
+
         {/* DEPARTMENT SUMMARY SECTION */}
         {departments.length > 0 && (
           <Animated.View entering={FadeInUp.delay(200)}>
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Ionicons name="folder" size={20} color="#3B82F6" />
-                <Text style={styles.sectionTitle}>Thống kê Phòng ban</Text>
+                <Text style={styles.sectionTitle}>Department Summary</Text>
               </View>
 
               {departments.map((dept, idx) => (
@@ -246,7 +328,7 @@ export function DashboardScreen({ navigation }: Props) {
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Ionicons name="hammer" size={20} color="#8B5CF6" />
-                <Text style={styles.sectionTitle}>Thống kê Dây chuyền</Text>
+                <Text style={styles.sectionTitle}>Production Line Summary</Text>
               </View>
 
               {productionLines.map((line, idx) => (
@@ -298,12 +380,12 @@ function DepartmentCard({ department }: DepartmentCardProps) {
 
       <View style={styles.miniStatsRow}>
         <MiniStat
-          label="Tổng"
+          label="Total"
           value={department.totalEmployees}
           color="#6B7280"
         />
-        <MiniStat label="Có mặt" value={department.present} color="#10B981" />
-        <MiniStat label="Đi muộn" value={department.late} color="#F59E0B" />
+        <MiniStat label="Present" value={department.present} color="#10B981" />
+        <MiniStat label="Late" value={department.late} color="#F59E0B" />
       </View>
 
       <View style={styles.miniProgressBar}>
@@ -341,16 +423,16 @@ function ProductionLineCard({ productionLine }: ProductionLineCardProps) {
 
       <View style={styles.miniStatsRow}>
         <MiniStat
-          label="Tổng"
+          label="Total"
           value={productionLine.totalEmployees}
           color="#6B7280"
         />
         <MiniStat
-          label="Có mặt"
+          label="Present"
           value={productionLine.present}
           color="#10B981"
         />
-        <MiniStat label="Đi muộn" value={productionLine.late} color="#F59E0B" />
+        <MiniStat label="Late" value={productionLine.late} color="#F59E0B" />
       </View>
 
       <View style={styles.miniProgressBar}>
@@ -487,6 +569,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "rgba(255, 255, 255, 0.8)",
     fontWeight: "600",
+  },
+  noticeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderRadius: 10,
+    backgroundColor: "#DBEAFE",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+  },
+  noticeText: {
+    flex: 1,
+    color: "#1E3A8A",
+    fontSize: 13,
+    fontWeight: "500",
   },
 
   // SECTIONS

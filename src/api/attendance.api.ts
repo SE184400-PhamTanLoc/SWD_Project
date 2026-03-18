@@ -10,6 +10,7 @@ import {
   AttendanceDetailDto,
   AttendanceHistoryListDto,
   AttendanceQueryParams,
+  UpdateAttendancePayload,
 } from "../types/api.types";
 
 export const attendanceApi = {
@@ -37,6 +38,21 @@ export const attendanceApi = {
   async getAttendanceDetail(id: string): Promise<AttendanceDetailDto> {
     const response = await axiosClient.get<any, AttendanceDetailDto>(
       `/attendance/${id}`,
+    );
+    return response;
+  },
+
+  /**
+   * PUT /api/attendance/{id}
+   * Cập nhật bản ghi chấm công (HR/Admin)
+   */
+  async updateAttendance(
+    id: string,
+    payload: UpdateAttendancePayload,
+  ): Promise<{ message: string }> {
+    const response = await axiosClient.put<any, { message: string }>(
+      `/attendance/${id}`,
+      payload,
     );
     return response;
   },

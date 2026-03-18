@@ -23,51 +23,131 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { attendanceService } from "../service/attendance.service";
+import CustomAlert from "../../components/CustomAlert";
+import { useAuth } from "../../context/AuthContext";
+import { attendanceService } from "../../service/attendance.service";
 import {
   AttendanceHistoryDto,
   AttendanceQueryParams,
-} from "../types/api.types";
-import { AppStackParamList } from "../types/navigation.types";
+} from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "AttendanceHistory">;
 
 export function AttendanceHistoryScreen({ navigation, route }: Props) {
+  const { user } = useAuth();
   const [historicalRecords, setHistoricalRecords] = useState<
     AttendanceHistoryDto[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize] = useState(20);
   const [totalRecords, setTotalRecords] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | undefined>(
     undefined,
   );
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [employeeIdFilter, setEmployeeIdFilter] = useState(
+    route.params?.employeeId ?? "",
+  );
+  const [departmentIdFilter, setDepartmentIdFilter] = useState(
+    route.params?.departmentId ? String(route.params.departmentId) : "",
+  );
+  const [productionLineIdFilter, setProductionLineIdFilter] = useState(
+    route.params?.productionLineId ? String(route.params.productionLineId) : "",
+  );
+  const [fromDateFilter, setFromDateFilter] = useState(
+    route.params?.fromDate ?? "",
+  );
+  const [toDateFilter, setToDateFilter] = useState(route.params?.toDate ?? "");
+  const [alert, setAlert] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    type: "info" as "success" | "error" | "info",
+  });
+  const [accessDeniedByApi, setAccessDeniedByApi] = useState(false);
 
-  // Cấu hình filter từ route params (nếu có)
-  const preFilters = route.params;
+  const normalizedRoles = (user?.roles ?? []).map((role) => role.toUpperCase());
+  const isManagerOnly =
+    normalizedRoles.includes("MANAGER") &&
+    !normalizedRoles.some((role) =>
+      ["ADMIN", "HR", "ADMINISTRATOR"].includes(role),
+    );
 
   useEffect(() => {
-    loadAttendanceHistory();
-  }, [pageNumber, filterStatus]);
+    loadAttendanceHistory(pageNumber);
+  }, [pageNumber]);
 
-  const loadAttendanceHistory = async (showLoader = true) => {
+  const normalizeStatus = (status?: string) => {
+    if (!status) return status;
+    return status === "Present" ? "OnTime" : status;
+  };
+
+  const parseOptionalPositiveInt = (value: string): number | undefined => {
+    const parsed = Number.parseInt(value.trim(), 10);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+  };
+
+  const getApiFilters = (): AttendanceQueryParams => ({
+    employeeId: employeeIdFilter.trim() || undefined,
+    departmentId: parseOptionalPositiveInt(departmentIdFilter),
+    productionLineId: parseOptionalPositiveInt(productionLineIdFilter),
+    fromDate: fromDateFilter.trim() || undefined,
+    toDate: toDateFilter.trim() || undefined,
+  });
+
+  const loadAttendanceHistory = async (
+    targetPageNumber = 1,
+    showLoader = true,
+  ) => {
     try {
       if (showLoader) setLoading(true);
 
       const params: AttendanceQueryParams = {
-        pageNumber,
+        pageNumber: targetPageNumber,
         pageSize,
-        ...preFilters,
+        ...getApiFilters(),
       };
 
       const response = await attendanceService.getAttendanceHistory(params);
-      setHistoricalRecords(response.data);
+      setAccessDeniedByApi(false);
+      if (targetPageNumber === 1) {
+        setHistoricalRecords(response.data);
+      } else {
+        setHistoricalRecords((prev) => {
+          const merged = [...prev, ...response.data];
+          const deduped = merged.filter(
+            (item, index) =>
+              merged.findIndex((x) => x.id === item.id) === index,
+          );
+          return deduped;
+        });
+      }
       setTotalRecords(response.totalRecords);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to load attendance history:", error);
+
+      const message = String(error?.message || "");
+      const lower = message.toLowerCase();
+      const isUnauthorizedMessage =
+        lower.includes("unauthorized") ||
+        lower.includes("forbidden") ||
+        lower.includes("no permission") ||
+        lower.includes("unauthorize");
+
+      if (isUnauthorizedMessage) {
+        setAccessDeniedByApi(true);
+      }
+
+      setAlert({
+        visible: true,
+        title: "Error",
+        message: message || "Unable to load attendance history",
+        type: "error",
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -76,22 +156,105 @@ export function AttendanceHistoryScreen({ navigation, route }: Props) {
 
   const onRefresh = () => {
     setRefreshing(true);
-    setPageNumber(1);
-    loadAttendanceHistory(false);
+    if (pageNumber !== 1) {
+      setPageNumber(1);
+      return;
+    }
+    loadAttendanceHistory(1, false);
   };
 
   const handleEndReached = () => {
-    const totalPages = Math.ceil(totalRecords / pageSize);
-    if (pageNumber < totalPages) {
+    const hasMore = historicalRecords.length < totalRecords;
+    if (!loading && hasMore) {
       setPageNumber(pageNumber + 1);
     }
   };
 
-  const filteredData = historicalRecords.filter((item) =>
-    searchQuery === ""
-      ? true
-      : item.employeeName.toLowerCase().includes(searchQuery.toLowerCase()),
+  const applyAdvancedFilters = () => {
+    if (pageNumber !== 1) {
+      setPageNumber(1);
+      return;
+    }
+    loadAttendanceHistory(1);
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    setFilterStatus(undefined);
+    setEmployeeIdFilter("");
+    setDepartmentIdFilter("");
+    setProductionLineIdFilter("");
+    setFromDateFilter("");
+    setToDateFilter("");
+    if (pageNumber !== 1) {
+      setPageNumber(1);
+      return;
+    }
+    loadAttendanceHistory(1);
+  };
+
+  const filteredData = historicalRecords.filter(
+    (item) =>
+      (searchQuery === ""
+        ? true
+        : item.employeeName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())) &&
+      (filterStatus
+        ? normalizeStatus(item.status) === normalizeStatus(filterStatus)
+        : true),
   );
+
+  const hasApiFilters = Boolean(
+    employeeIdFilter.trim() ||
+    departmentIdFilter.trim() ||
+    productionLineIdFilter.trim() ||
+    fromDateFilter.trim() ||
+    toDateFilter.trim(),
+  );
+  const hasClientFilters = Boolean(searchQuery.trim() || filterStatus);
+  const hasAnyFilters = hasApiFilters || hasClientFilters;
+
+  const getEmptyState = () => {
+    if (accessDeniedByApi) {
+      return {
+        title: "Access Denied",
+        message:
+          "Your current account is not allowed to view consolidated attendance history.",
+      };
+    }
+
+    if (historicalRecords.length > 0 && filteredData.length === 0) {
+      return {
+        title: "No Data Matches Active Filters",
+        message:
+          "The list is currently hidden by search or status filters. Try clearing all filters.",
+      };
+    }
+
+    if (isManagerOnly) {
+      return {
+        title: "No Data In Managed Scope",
+        message:
+          "Managers can only view data from assigned departments/production lines. Check manager assignments or create attendance records.",
+      };
+    }
+
+    if (hasApiFilters) {
+      return {
+        title: "No Data",
+        message:
+          "The server returned no records for the current advanced filters.",
+      };
+    }
+
+    return {
+      title: "No Data",
+      message: "There are no attendance records in the system yet.",
+    };
+  };
+
+  const emptyState = getEmptyState();
 
   const handleAttendanceSelect = (record: AttendanceHistoryDto) => {
     navigation.navigate("AttendanceDetail", { recordId: record.id });
@@ -115,7 +278,7 @@ export function AttendanceHistoryScreen({ navigation, route }: Props) {
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Tìm tên nhân viên..."
+            placeholder="Search employee name..."
             placeholderTextColor="#9CA3AF"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -130,9 +293,94 @@ export function AttendanceHistoryScreen({ navigation, route }: Props) {
           )}
         </View>
 
+        <TouchableOpacity
+          style={styles.advancedFilterToggle}
+          onPress={() => setShowAdvancedFilters((prev) => !prev)}
+        >
+          <Text style={styles.advancedFilterToggleText}>
+            {showAdvancedFilters
+              ? "Hide advanced filters"
+              : "Show advanced filters"}
+          </Text>
+          <Ionicons
+            name={showAdvancedFilters ? "chevron-up" : "chevron-down"}
+            size={16}
+            color="#E5E7EB"
+          />
+        </TouchableOpacity>
+
+        {showAdvancedFilters && (
+          <View style={styles.advancedFilterCard}>
+            <TextInput
+              style={styles.filterInput}
+              placeholder="employeeId (GUID)"
+              placeholderTextColor="#9CA3AF"
+              value={employeeIdFilter}
+              onChangeText={setEmployeeIdFilter}
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.filterInput}
+              placeholder="departmentId"
+              placeholderTextColor="#9CA3AF"
+              value={departmentIdFilter}
+              onChangeText={setDepartmentIdFilter}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={styles.filterInput}
+              placeholder="productionLineId"
+              placeholderTextColor="#9CA3AF"
+              value={productionLineIdFilter}
+              onChangeText={setProductionLineIdFilter}
+              keyboardType="numeric"
+            />
+            <TextInput
+              style={styles.filterInput}
+              placeholder="fromDate (YYYY-MM-DD)"
+              placeholderTextColor="#9CA3AF"
+              value={fromDateFilter}
+              onChangeText={setFromDateFilter}
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.filterInput}
+              placeholder="toDate (YYYY-MM-DD)"
+              placeholderTextColor="#9CA3AF"
+              value={toDateFilter}
+              onChangeText={setToDateFilter}
+              autoCapitalize="none"
+            />
+
+            <TouchableOpacity
+              style={styles.applyFilterButton}
+              onPress={applyAdvancedFilters}
+            >
+              <Text style={styles.applyFilterButtonText}>Apply filters</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* STATUS FILTER PILLS */}
         <View style={styles.filterPills}>
-          {["Present", "Late", "Absent", "ExceptionPending"].map((status) => (
+          <TouchableOpacity
+            onPress={() => setFilterStatus(undefined)}
+            style={[styles.pill, !filterStatus && styles.pillActive]}
+          >
+            <Text
+              style={[styles.pillText, !filterStatus && styles.pillTextActive]}
+            >
+              All
+            </Text>
+          </TouchableOpacity>
+          {[
+            "OnTime",
+            "Late",
+            "EarlyLeave",
+            "Absent",
+            "OnLeave",
+            "SickLeave",
+          ].map((status) => (
             <TouchableOpacity
               key={status}
               onPress={() =>
@@ -164,7 +412,18 @@ export function AttendanceHistoryScreen({ navigation, route }: Props) {
       ) : filteredData.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="document-outline" size={48} color="#D1D5DB" />
-          <Text style={styles.emptyText}>Không có dữ liệu</Text>
+          <Text style={styles.emptyText}>{emptyState.title}</Text>
+          <Text style={styles.emptySubText}>{emptyState.message}</Text>
+          {hasAnyFilters && (
+            <TouchableOpacity
+              style={styles.clearFiltersButton}
+              onPress={clearAllFilters}
+            >
+              <Text style={styles.clearFiltersButtonText}>
+                Clear all filters
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       ) : (
         <FlatList
@@ -198,10 +457,18 @@ export function AttendanceHistoryScreen({ navigation, route }: Props) {
       <View style={styles.paginationFooter}>
         <Text style={styles.paginationText}>
           {filteredData.length > 0
-            ? `Trang ${pageNumber} • Tổng: ${totalRecords}`
+            ? `Page ${pageNumber} • Total: ${totalRecords}`
             : ""}
         </Text>
       </View>
+
+      <CustomAlert
+        visible={alert.visible}
+        title={alert.title}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert((prev) => ({ ...prev, visible: false }))}
+      />
     </SafeAreaView>
   );
 }
@@ -216,7 +483,9 @@ interface AttendanceHistoryItemProps {
 function AttendanceHistoryItem({ item, onPress }: AttendanceHistoryItemProps) {
   const statusColor = attendanceService.getStatusColor(item.status);
   const statusLabel = attendanceService.getStatusLabel(item.status);
-  const checkInTime = attendanceService.formatTime(item.checkInTime);
+  const checkInTime = item.checkInTime
+    ? attendanceService.formatTime(item.checkInTime)
+    : "--:--";
 
   return (
     <Animated.View entering={FadeInDown.delay(100)}>
@@ -290,6 +559,44 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: 4,
   },
+  advancedFilterToggle: {
+    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  advancedFilterToggleText: {
+    color: "#E5E7EB",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  advancedFilterCard: {
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+  },
+  filterInput: {
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 40,
+    marginBottom: 8,
+    color: "#1F2937",
+    fontSize: 13,
+  },
+  applyFilterButton: {
+    height: 38,
+    borderRadius: 8,
+    backgroundColor: "#0EA5E9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  applyFilterButtonText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "700",
+  },
 
   // FILTER PILLS
   filterPills: {
@@ -332,6 +639,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#9CA3AF",
     marginTop: 12,
+    fontWeight: "600",
+  },
+  emptySubText: {
+    marginTop: 8,
+    fontSize: 13,
+    color: "#6B7280",
+    textAlign: "center",
+    paddingHorizontal: 28,
+    lineHeight: 18,
+  },
+  clearFiltersButton: {
+    marginTop: 14,
+    backgroundColor: "#3B82F6",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  clearFiltersButtonText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700",
   },
 
   listContent: {

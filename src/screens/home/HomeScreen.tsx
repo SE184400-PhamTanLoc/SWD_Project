@@ -13,10 +13,10 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { useAuth } from "../context/AuthContext";
-import { dashboardService } from "../service/dashboard.service";
-import { employeeService } from "../service/employee.service";
-import { AppStackParamList } from "../types/navigation.types";
+import { useAuth } from "../../context/AuthContext";
+import { dashboardService } from "../../service/dashboard.service";
+import { employeeService } from "../../service/employee.service";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "Home">;
 
@@ -398,6 +398,23 @@ export function HomeScreen({ navigation }: Props) {
                 </View>
                 <Text style={styles.compactTitle}>IoT</Text>
                 <Text style={styles.compactSub}>Devices</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.compactCard}
+                onPress={() => navigation.navigate("Reports")}
+                activeOpacity={0.85}
+              >
+                <View
+                  style={[
+                    styles.compactIcon,
+                    { backgroundColor: "rgba(79, 172, 254, 0.12)" },
+                  ]}
+                >
+                  <Ionicons name="document-text" size={22} color="#4FACFE" />
+                </View>
+                <Text style={styles.compactTitle}>Reports</Text>
+                <Text style={styles.compactSub}>Analytics + Export</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
