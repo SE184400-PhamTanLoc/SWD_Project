@@ -16,11 +16,11 @@ import {
     View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { productionLineApi } from "../api/productionLine.api";
-import CustomAlert from "../components/CustomAlert";
-import { iotService } from "../service/iot.service";
-import { ProductionLine } from "../types/api.types";
-import { AppStackParamList } from "../types/navigation.types";
+import { productionLineApi } from "../../api/productionLine.api";
+import CustomAlert from "../../components/CustomAlert";
+import { iotService } from "../../service/iot.service";
+import { ProductionLine } from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "AddIoTDevice">;
 

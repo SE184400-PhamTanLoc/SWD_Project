@@ -4,22 +4,32 @@
  */
 
 import { iotApi } from "../api/iot.api";
-import { IoTDevice } from "../types/api.types";
+import { IoTDeviceMonitoringDto, IoTDeviceStatusDto } from "../types/api.types";
 
 export const iotService = {
-    async getDevices(): Promise<IoTDevice[]> {
-        try {
-            return await iotApi.getDevices();
-        } catch (error) {
-            throw error;
-        }
-    },
+  async getDevices(): Promise<IoTDeviceMonitoringDto[]> {
+    try {
+      return await iotApi.getDevices();
+    } catch (error) {
+      throw error;
+    }
+  },
 
-    async registerDevice(data: any): Promise<{ deviceId: number; message: string }> {
-        try {
-            return await iotApi.registerDevice(data);
-        } catch (error) {
-            throw error;
-        }
-    },
+  async getDeviceStatus(deviceId: number): Promise<IoTDeviceStatusDto> {
+    try {
+      return await iotApi.getDeviceStatus(deviceId);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async registerDevice(
+    data: any,
+  ): Promise<{ deviceId: number; message: string }> {
+    try {
+      return await iotApi.registerDevice(data);
+    } catch (error) {
+      throw error;
+    }
+  },
 };
