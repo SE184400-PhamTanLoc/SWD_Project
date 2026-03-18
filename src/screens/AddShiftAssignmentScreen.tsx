@@ -18,37 +18,16 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { employeeApi } from "../../api/employee.api";
-import { productionLineApi } from "../../api/productionLine.api";
-import { shiftApi } from "../../api/shift.api";
-import CustomAlert from "../../components/CustomAlert";
-import { Employee, ProductionLine, Shift } from "../../types/api.types";
-import { AppStackParamList } from "../../types/navigation.types";
+import { employeeApi } from "../api/employee.api";
+import { productionLineApi } from "../api/productionLine.api";
+import { shiftApi } from "../api/shift.api";
+import CustomAlert from "../components/CustomAlert";
+import { Employee, ProductionLine, Shift } from "../types/api.types";
+import { AppStackParamList } from "../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "AddShiftAssignment">;
 
-export function AddShiftAssignmentScreen({ navigation, route }: Props) {
-  const editingAssignment = route.params?.assignment;
-  const isEditMode = !!editingAssignment?.id;
-
-  const parseDateSafe = (value: string | undefined, fallback: Date): Date => {
-    if (!value) return fallback;
-    const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return fallback;
-    }
-    return parsed;
-  };
-
-  const defaultFromDate = parseDateSafe(
-    editingAssignment?.fromDate,
-    new Date(),
-  );
-  const defaultToDate = parseDateSafe(
-    editingAssignment?.toDate,
-    new Date(new Date().setDate(new Date().getDate() + 7)),
-  );
-
+export function AddShiftAssignmentScreen({ navigation }: Props) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [lines, setLines] = useState<ProductionLine[]>([]);
@@ -61,8 +40,10 @@ export function AddShiftAssignmentScreen({ navigation, route }: Props) {
   );
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
   const [selectedLine, setSelectedLine] = useState<ProductionLine | null>(null);
-  const [fromDate, setFromDate] = useState(defaultFromDate);
-  const [toDate, setToDate] = useState(defaultToDate);
+  const [fromDate, setFromDate] = useState(new Date());
+  const [toDate, setToDate] = useState(
+    new Date(new Date().setDate(new Date().getDate() + 7)),
+  );
 
   // UI state
   const [showFromPicker, setShowFromPicker] = useState(false);
@@ -91,22 +72,6 @@ export function AddShiftAssignmentScreen({ navigation, route }: Props) {
         setEmployees(empData);
         setShifts(shiftData);
         setLines(lineData);
-
-        if (editingAssignment) {
-          const employee =
-            empData.find((e) => e.id === editingAssignment.employeeId) ?? null;
-          const shift =
-            shiftData.find((s) => s.id === editingAssignment.shiftId) ?? null;
-          const line = editingAssignment.productionLineId
-            ? (lineData.find(
-                (l) => l.id === editingAssignment.productionLineId,
-              ) ?? null)
-            : null;
-
-          setSelectedEmployee(employee);
-          setSelectedShift(shift);
-          setSelectedLine(line);
-        }
       } catch (error) {
         console.error("Error fetching data for assignment:", error);
         setAlert({
@@ -121,7 +86,7 @@ export function AddShiftAssignmentScreen({ navigation, route }: Props) {
       }
     };
     fetchData();
-  }, [editingAssignment]);
+  }, []);
 
   const toIsoAtNoon = (date: Date): string => {
     const normalized = new Date(date);
@@ -185,26 +150,17 @@ export function AddShiftAssignmentScreen({ navigation, route }: Props) {
 
     setSubmitting(true);
     try {
-      const payload = {
+      await shiftApi.assignShift({
         employeeId: employee.id,
         shiftId: shift.id,
         fromDate: toIsoAtNoon(fromDate),
         toDate: toIsoAtNoon(toDate),
         productionLineId: selectedLine?.id,
-      };
-
-      if (isEditMode && editingAssignment) {
-        await shiftApi.updateAssignment(editingAssignment.id, payload);
-      } else {
-        await shiftApi.assignShift(payload);
-      }
-
+      });
       setAlert({
         visible: true,
         title: "Success",
-        message: isEditMode
-          ? "Shift assignment updated successfully"
-          : "Shift assigned successfully",
+        message: "Shift assigned successfully",
         type: "success",
         onConfirm: () => navigation.goBack(),
       });
@@ -269,7 +225,7 @@ export function AddShiftAssignmentScreen({ navigation, route }: Props) {
       isSelected = selectedShift?.id === item.id;
     } else {
       title = item.lineName;
-      subtitle = item.lineCode || `Line #${item.id}`;
+      subtitle = item.lineCode;
       isSelected = selectedLine?.id === item.id;
     }
 
@@ -322,9 +278,7 @@ export function AddShiftAssignmentScreen({ navigation, route }: Props) {
         >
           <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {isEditMode ? "Edit Shift Assignment" : "New Shift Assignment"}
-        </Text>
+        <Text style={styles.headerTitle}>New Shift Assignment</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -483,9 +437,7 @@ export function AddShiftAssignmentScreen({ navigation, route }: Props) {
               <ActivityIndicator color="white" />
             ) : (
               <>
-                <Text style={styles.submitText}>
-                  {isEditMode ? "Update Assignment" : "Create Assignment"}
-                </Text>
+                <Text style={styles.submitText}>Create Assignment</Text>
                 <Ionicons
                   name="checkmark-done"
                   size={20}

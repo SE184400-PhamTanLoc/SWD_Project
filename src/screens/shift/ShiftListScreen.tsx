@@ -15,9 +15,9 @@ import {
     View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { shiftApi } from "../api/shift.api";
-import { Shift } from "../types/api.types";
-import { AppStackParamList } from "../types/navigation.types";
+import { shiftApi } from "../../api/shift.api";
+import { Shift } from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "ShiftList">;
 

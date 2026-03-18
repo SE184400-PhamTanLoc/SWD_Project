@@ -15,27 +15,40 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import axiosClient from "../api/axiosClient";
-import { productionLineApi } from "../api/productionLine.api";
-import CustomAlert from "../components/CustomAlert";
-import { AppStackParamList } from "../types/navigation.types";
+import axiosClient from "../../api/axiosClient";
+import { productionLineApi } from "../../api/productionLine.api";
+import CustomAlert from "../../components/CustomAlert";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "AddProductionLine">;
+const SUPPORTS_PRODUCTION_LINE_UPDATE = false;
 
 interface Department {
   id: number;
   name: string;
 }
 
-export function AddProductionLineScreen({ navigation }: Props) {
+export function AddProductionLineScreen({ navigation, route }: Props) {
+  const selectedLine = route.params?.productionLine;
+  const isEditMode = !!selectedLine?.id;
+
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [form, setForm] = useState({
-    lineName: "",
-    departmentId: "",
-    capacity: "",
-    machineCount: "",
-    status: "Active",
+    lineName: selectedLine?.lineName ?? "",
+    departmentId: selectedLine?.departmentId
+      ? selectedLine.departmentId.toString()
+      : "",
+    capacity:
+      selectedLine?.capacity !== undefined && selectedLine?.capacity !== null
+        ? String(selectedLine.capacity)
+        : "",
+    machineCount:
+      selectedLine?.machineCount !== undefined &&
+      selectedLine?.machineCount !== null
+        ? String(selectedLine.machineCount)
+        : "",
+    status: selectedLine?.status ?? "Active",
   });
 
   const [alert, setAlert] = useState({
@@ -57,7 +70,7 @@ export function AddProductionLineScreen({ navigation }: Props) {
       if (response.length > 0) {
         setForm((prev) => ({
           ...prev,
-          departmentId: response[0].id.toString(),
+          departmentId: prev.departmentId || response[0].id.toString(),
         }));
       }
     } catch (error) {
@@ -140,14 +153,32 @@ export function AddProductionLineScreen({ navigation }: Props) {
       status: form.status,
     };
 
+    if (isEditMode && !SUPPORTS_PRODUCTION_LINE_UPDATE) {
+      setAlert({
+        visible: true,
+        title: "Unsupported",
+        message:
+          "BE hien tai chua ho tro API sua Production Line (PUT /api/ProductionLines/{id}).",
+        type: "info",
+        onConfirm: undefined,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      await productionLineApi.createProductionLine(data as any);
+      if (isEditMode && selectedLine) {
+        await productionLineApi.updateProductionLine(selectedLine.id, data);
+      } else {
+        await productionLineApi.createProductionLine(data);
+      }
 
       setAlert({
         visible: true,
         title: "Success",
-        message: "Production Line created successfully!",
+        message: isEditMode
+          ? "Production Line updated successfully!"
+          : "Production Line created successfully!",
         type: "success",
         onConfirm: () => navigation.goBack(),
       });
@@ -182,7 +213,9 @@ export function AddProductionLineScreen({ navigation }: Props) {
             >
               <Ionicons name="chevron-back" size={28} color="#333" />
             </TouchableOpacity>
-            <Text style={styles.title}>New Production Line</Text>
+            <Text style={styles.title}>
+              {isEditMode ? "Edit Production Line" : "New Production Line"}
+            </Text>
             <View style={{ width: 28 }} />
           </Animated.View>
 
@@ -315,7 +348,9 @@ export function AddProductionLineScreen({ navigation }: Props) {
                     <ActivityIndicator color="white" />
                   ) : (
                     <Text style={styles.saveButtonText}>
-                      CREATE PRODUCTION LINE
+                      {isEditMode
+                        ? "UPDATE PRODUCTION LINE"
+                        : "CREATE PRODUCTION LINE"}
                     </Text>
                   )}
                 </LinearGradient>
