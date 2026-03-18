@@ -15,11 +15,11 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import CustomAlert from "../components/CustomAlert";
-import EmployeeCard from "../components/EmployeeCard";
-import { employeeService } from "../service/employee.service";
-import { Employee } from "../types/api.types";
-import { AppStackParamList } from "../types/navigation.types";
+import CustomAlert from "../../components/CustomAlert";
+import EmployeeCard from "../../components/EmployeeCard";
+import { employeeService } from "../../service/employee.service";
+import { Employee } from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "EmployeeList">;
 
@@ -28,7 +28,9 @@ export function EmployeeListScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
+  const [filterActive, setFilterActive] = useState<boolean | undefined>(
+    undefined,
+  );
   const [departmentId, setDepartmentId] = useState("");
 
   const [alert, setAlert] = useState({
@@ -45,7 +47,9 @@ export function EmployeeListScreen({ navigation }: Props) {
 
       const params: any = {};
       if (filterActive !== undefined) params.isActive = filterActive;
-      if (departmentId.trim() !== "") params.departmentId = parseInt(departmentId);
+      if (departmentId.trim() !== "" && /^\d+$/.test(departmentId.trim())) {
+        params.departmentId = parseInt(departmentId.trim(), 10);
+      }
 
       const data = await employeeService.getEmployees(params);
 
@@ -84,10 +88,28 @@ export function EmployeeListScreen({ navigation }: Props) {
     });
   };
 
-  const filteredEmployees = employees.filter((emp) =>
-    emp.fullName.toLowerCase().includes(search.toLowerCase()) ||
-    emp.employeeCode.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredEmployees = employees.filter((emp) => {
+    const keyword = search.trim().toLowerCase();
+    const matchesSearch =
+      keyword.length === 0 ||
+      emp.fullName.toLowerCase().includes(keyword) ||
+      emp.employeeCode.toLowerCase().includes(keyword);
+
+    // Keep a local guard for active/inactive filter so UI remains correct
+    // even if backend query params are ignored by any environment/proxy.
+    const matchesActive =
+      filterActive === undefined
+        ? true
+        : Boolean(emp.isActive) === filterActive;
+
+    const deptKeyword = departmentId.trim();
+    const matchesDepartment =
+      deptKeyword.length === 0 ||
+      (/^\d+$/.test(deptKeyword) &&
+        emp.departmentId === parseInt(deptKeyword, 10));
+
+    return matchesSearch && matchesActive && matchesDepartment;
+  });
 
   return (
     <View style={styles.container}>
@@ -95,23 +117,40 @@ export function EmployeeListScreen({ navigation }: Props) {
 
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
-          <Animated.View entering={FadeInUp.duration(600)} style={styles.titleContainer}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Animated.View
+            entering={FadeInUp.duration(600)}
+            style={styles.titleContainer}
+          >
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}
+            >
               <Ionicons name="chevron-back" size={28} color="#1A1A1A" />
             </TouchableOpacity>
-            <Text style={styles.title}>Talent Pool</Text>
+            <Text style={styles.title}>Employees</Text>
             <TouchableOpacity
               style={styles.addButton}
               onPress={() => navigation.navigate("AddEmployee")}
             >
-              <LinearGradient colors={["#00F2FE", "#4FACFE"]} style={styles.addGradient}>
+              <LinearGradient
+                colors={["#00F2FE", "#4FACFE"]}
+                style={styles.addGradient}
+              >
                 <Ionicons name="add" size={26} color="white" />
               </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+          <Animated.View
+            entering={FadeInUp.delay(200).duration(600)}
+            style={styles.searchContainer}
+          >
+            <Ionicons
+              name="search"
+              size={20}
+              color="#999"
+              style={styles.searchIcon}
+            />
             <TextInput
               placeholder="Search by name or code..."
               placeholderTextColor="#999"
@@ -126,7 +165,10 @@ export function EmployeeListScreen({ navigation }: Props) {
             )}
           </Animated.View>
 
-          <Animated.View entering={FadeInUp.delay(300).duration(600)} style={styles.filterSection}>
+          <Animated.View
+            entering={FadeInUp.delay(300).duration(600)}
+            style={styles.filterSection}
+          >
             <View style={styles.statusFilters}>
               {["All", "Active", "Inactive"].map((label) => {
                 const val = label === "All" ? undefined : label === "Active";
@@ -135,9 +177,17 @@ export function EmployeeListScreen({ navigation }: Props) {
                   <TouchableOpacity
                     key={label}
                     onPress={() => setFilterActive(val)}
-                    style={[styles.filterChip, isActive && styles.filterChipActive]}
+                    style={[
+                      styles.filterChip,
+                      isActive && styles.filterChipActive,
+                    ]}
                   >
-                    <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
+                    <Text
+                      style={[
+                        styles.filterText,
+                        isActive && styles.filterTextActive,
+                      ]}
+                    >
                       {label}
                     </Text>
                   </TouchableOpacity>
@@ -147,7 +197,12 @@ export function EmployeeListScreen({ navigation }: Props) {
 
             <View style={styles.deptFilterContainer}>
               <View style={styles.deptInputWrapper}>
-                <Ionicons name="business-outline" size={16} color="#999" style={styles.deptIcon} />
+                <Ionicons
+                  name="business-outline"
+                  size={16}
+                  color="#999"
+                  style={styles.deptIcon}
+                />
                 <TextInput
                   placeholder="Dept ID"
                   placeholderTextColor="#999"
@@ -157,18 +212,6 @@ export function EmployeeListScreen({ navigation }: Props) {
                   keyboardType="numeric"
                 />
               </View>
-              {(filterActive !== undefined || departmentId !== "" || search !== "") && (
-                <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={() => {
-                    setFilterActive(undefined);
-                    setDepartmentId("");
-                    setSearch("");
-                  }}
-                >
-                  <Ionicons name="refresh-circle" size={24} color="#FF4D4D" />
-                </TouchableOpacity>
-              )}
             </View>
           </Animated.View>
         </View>
@@ -183,7 +226,9 @@ export function EmployeeListScreen({ navigation }: Props) {
             data={filteredEmployees}
             keyExtractor={(item) => item.id}
             renderItem={({ item, index }) => (
-              <Animated.View entering={FadeInDown.delay(index * 100).duration(500)}>
+              <Animated.View
+                entering={FadeInDown.delay(index * 100).duration(500)}
+              >
                 <EmployeeCard
                   employee={item}
                   onPress={(emp) => console.log("Press", emp.fullName)}
@@ -205,7 +250,10 @@ export function EmployeeListScreen({ navigation }: Props) {
               <View style={styles.emptyContainer}>
                 <Ionicons name="people-outline" size={80} color="#E0E0E0" />
                 <Text style={styles.emptyText}>No employees found</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={() => loadEmployees()}>
+                <TouchableOpacity
+                  style={styles.retryButton}
+                  onPress={() => loadEmployees()}
+                >
                   <Text style={styles.retryText}>Refresh List</Text>
                 </TouchableOpacity>
               </View>

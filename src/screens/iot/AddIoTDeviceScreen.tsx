@@ -1,13 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
     ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     TextInput,
@@ -15,26 +16,24 @@ import {
     View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Department, departmentApi } from "../api/department.api";
-import CustomAlert from "../components/CustomAlert";
-import { employeeService } from "../service/employee.service";
-import { AppStackParamList } from "../types/navigation.types";
+import { productionLineApi } from "../../api/productionLine.api";
+import CustomAlert from "../../components/CustomAlert";
+import { iotService } from "../../service/iot.service";
+import { ProductionLine } from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
-type Props = NativeStackScreenProps<AppStackParamList, "AddEmployee">;
+type Props = NativeStackScreenProps<AppStackParamList, "AddIoTDevice">;
 
-export function AddEmployeeScreen({ navigation }: Props) {
+export function AddIoTDeviceScreen({ navigation }: Props) {
     const [loading, setLoading] = useState(false);
-    const [departments, setDepartments] = useState<Department[]>([]);
+    const [productionLines, setProductionLines] = useState<ProductionLine[]>([]);
     const [form, setForm] = useState({
-        fullName: "",
-        employeeCode: "",
-        email: "",
-        phoneNumber: "",
-        identityNumber: "",
-        dateOfBirth: new Date(new Date().setFullYear(new Date().getFullYear() - 20)).toISOString().split("T")[0],
-        hireDate: new Date().toISOString().split("T")[0],
-        isActive: true,
-        departmentId: "",
+        deviceName: "",
+        deviceType: "ESP32-CAM", // Default
+        lineId: "",
+        locationDesc: "",
+        ipAddress: "",
+        macAddress: "",
     });
 
     const [alert, setAlert] = useState({
@@ -45,32 +44,29 @@ export function AddEmployeeScreen({ navigation }: Props) {
         onConfirm: undefined as (() => void) | undefined,
     });
 
-    useEffect(() => {
-        fetchDepartments();
+    React.useEffect(() => {
+        fetchProductionLines();
     }, []);
 
-    const fetchDepartments = async () => {
+    const fetchProductionLines = async () => {
         try {
-            const data = await departmentApi.getDepartments();
-            setDepartments(data);
-            if (data.length > 0) {
-                setForm(prev => ({ ...prev, departmentId: data[0].id.toString() }));
-            }
+            const data = await productionLineApi.getProductionLines();
+            setProductionLines(data);
         } catch (error) {
-            console.error("Error fetching departments:", error);
+            console.error("Error fetching production lines:", error);
         }
     };
 
-    const handleInputChange = (field: string, value: any) => {
+    const handleInputChange = (field: string, value: string) => {
         setForm({ ...form, [field]: value });
     };
 
     const onSave = async () => {
-        if (!form.fullName || !form.employeeCode || !form.departmentId) {
+        if (!form.deviceName.trim()) {
             setAlert({
                 visible: true,
                 title: "Validation Error",
-                message: "Full Name, Employee Code and Department are required",
+                message: "Device Name is required",
                 type: "error",
                 onConfirm: undefined,
             });
@@ -81,32 +77,25 @@ export function AddEmployeeScreen({ navigation }: Props) {
         try {
             const dataToSave = {
                 ...form,
-                departmentId: parseInt(form.departmentId),
-                dateOfBirth: new Date(form.dateOfBirth).toISOString(),
-                hireDate: new Date(form.hireDate).toISOString(),
+                lineId: form.lineId ? parseInt(form.lineId) : null,
             };
-            await employeeService.createEmployee(dataToSave as any);
+            await iotService.registerDevice(dataToSave);
             setAlert({
                 visible: true,
                 title: "Success",
-                message: "Employee created successfully!",
+                message: "IoT Device registered successfully!",
                 type: "success",
                 onConfirm: () => navigation.goBack(),
             });
         } catch (error: any) {
-            console.error("Create employee error:", error);
-            let message = error.message || "Failed to create employee";
-            let title = "Error";
-
-            if (error.response?.status === 403) {
-                title = "Permission Denied";
-                message = "Your account does not have permission (Admin/HR) to create employees.";
-            }
-
+            const errorMessage =
+                error?.response?.data?.message ||
+                error?.message ||
+                "Failed to register device";
             setAlert({
                 visible: true,
-                title: title,
-                message: message,
+                title: "Error",
+                message: errorMessage,
                 type: "error",
                 onConfirm: undefined,
             });
@@ -117,6 +106,8 @@ export function AddEmployeeScreen({ navigation }: Props) {
 
     return (
         <View style={styles.container}>
+            <StatusBar barStyle="dark-content" />
+
             <SafeAreaView style={styles.safeArea}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -124,146 +115,138 @@ export function AddEmployeeScreen({ navigation }: Props) {
                 >
                     <Animated.View entering={FadeInUp.duration(600)} style={styles.header}>
                         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                            <Ionicons name="chevron-back" size={28} color="#333" />
+                            <Ionicons name="chevron-back" size={28} color="#1A1A1A" />
                         </TouchableOpacity>
-                        <Text style={styles.title}>New Employee</Text>
+                        <Text style={styles.title}>Provision Node</Text>
                         <View style={{ width: 28 }} />
                     </Animated.View>
 
                     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                         <Animated.View entering={FadeInDown.delay(200).duration(800)} style={styles.form}>
+
+                            {/* Device Name */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Full Name *</Text>
+                                <Text style={styles.label}>Device Label *</Text>
                                 <View style={styles.inputContainer}>
-                                    <Ionicons name="person-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+                                    <Ionicons name="hardware-chip-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
                                     <TextInput
-                                        placeholder="Enter full name"
+                                        placeholder="e.g. ESP32-CAM-01"
                                         placeholderTextColor="#999"
                                         style={styles.input}
-                                        value={form.fullName}
-                                        onChangeText={(v) => handleInputChange("fullName", v)}
+                                        value={form.deviceName}
+                                        onChangeText={(v) => handleInputChange("deviceName", v)}
                                     />
                                 </View>
                             </View>
 
+                            {/* Device Type */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Employee Code *</Text>
+                                <Text style={styles.label}>Hardware Model</Text>
                                 <View style={styles.inputContainer}>
-                                    <Ionicons name="barcode-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+                                    <Ionicons name="layers-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
                                     <TextInput
-                                        placeholder="EMP001"
+                                        placeholder="e.g. ESP32-CAM"
                                         placeholderTextColor="#999"
                                         style={styles.input}
-                                        value={form.employeeCode}
-                                        onChangeText={(v) => handleInputChange("employeeCode", v)}
-                                        autoCapitalize="characters"
+                                        value={form.deviceType}
+                                        onChangeText={(v) => handleInputChange("deviceType", v)}
                                     />
                                 </View>
                             </View>
 
+                            {/* Production Line */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Identity Number (CCCD/CMND)</Text>
+                                <Text style={styles.label}>Production Line</Text>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectorScroll}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.selectorItem,
+                                            form.lineId === "" && styles.selectorItemActive
+                                        ]}
+                                        onPress={() => handleInputChange("lineId", "")}
+                                    >
+                                        <Text style={[
+                                            styles.selectorText,
+                                            form.lineId === "" && styles.selectorTextActive
+                                        ]}>
+                                            NONE
+                                        </Text>
+                                    </TouchableOpacity>
+                                    {productionLines.map((line) => (
+                                        <TouchableOpacity
+                                            key={line.id}
+                                            style={[
+                                                styles.selectorItem,
+                                                form.lineId === line.id.toString() && styles.selectorItemActive
+                                            ]}
+                                            onPress={() => handleInputChange("lineId", line.id.toString())}
+                                        >
+                                            <Text style={[
+                                                styles.selectorText,
+                                                form.lineId === line.id.toString() && styles.selectorTextActive
+                                            ]}>
+                                                {line.lineName}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                                {productionLines.length === 0 && (
+                                    <Text style={styles.helperText}>No production lines found.</Text>
+                                )}
+                            </View>
+
+                            {/* Location */}
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Deployment Zone</Text>
                                 <View style={styles.inputContainer}>
-                                    <Ionicons name="card-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+                                    <Ionicons name="location-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
                                     <TextInput
-                                        placeholder="Enter identity number"
+                                        placeholder="e.g. Main Encampment"
                                         placeholderTextColor="#999"
                                         style={styles.input}
-                                        value={form.identityNumber}
-                                        onChangeText={(v) => handleInputChange("identityNumber", v)}
+                                        value={form.locationDesc}
+                                        onChangeText={(v) => handleInputChange("locationDesc", v)}
+                                    />
+                                </View>
+                            </View>
+
+                            {/* IP Address */}
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.label}>Network IP</Text>
+                                <View style={styles.inputContainer}>
+                                    <Ionicons name="globe-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+                                    <TextInput
+                                        placeholder="e.g. 192.168.1.102"
+                                        placeholderTextColor="#999"
+                                        style={styles.input}
+                                        value={form.ipAddress}
+                                        onChangeText={(v) => handleInputChange("ipAddress", v)}
                                         keyboardType="numeric"
                                     />
                                 </View>
                             </View>
 
+                            {/* MAC Address */}
                             <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Department *</Text>
-                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectorScroll}>
-                                    {departments.map((dept) => (
-                                        <TouchableOpacity
-                                            key={dept.id}
-                                            style={[
-                                                styles.selectorItem,
-                                                form.departmentId === dept.id.toString() && styles.selectorItemActive
-                                            ]}
-                                            onPress={() => handleInputChange("departmentId", dept.id.toString())}
-                                        >
-                                            <Text style={[
-                                                styles.selectorText,
-                                                form.departmentId === dept.id.toString() && styles.selectorTextActive
-                                            ]}>
-                                                [{dept.departmentCode}] {dept.name}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </ScrollView>
-                                {departments.length === 0 && (
-                                    <Text style={styles.helperText}>No departments found. Please create one first.</Text>
-                                )}
-                            </View>
-
-                            <View style={styles.inputRow}>
-                                <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
-                                    <Text style={styles.label}>Date of Birth</Text>
-                                    <View style={styles.inputContainer}>
-                                        <TextInput
-                                            placeholder="1990-01-01"
-                                            placeholderTextColor="#999"
-                                            style={styles.input}
-                                            value={form.dateOfBirth}
-                                            onChangeText={(v) => handleInputChange("dateOfBirth", v)}
-                                        />
-                                    </View>
-                                </View>
-                                <View style={[styles.inputGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>Hire Date</Text>
-                                    <View style={styles.inputContainer}>
-                                        <TextInput
-                                            placeholder="2024-01-01"
-                                            placeholderTextColor="#999"
-                                            style={styles.input}
-                                            value={form.hireDate}
-                                            onChangeText={(v) => handleInputChange("hireDate", v)}
-                                        />
-                                    </View>
-                                </View>
-                            </View>
-
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Email Address</Text>
+                                <Text style={styles.label}>MAC Identifier</Text>
                                 <View style={styles.inputContainer}>
-                                    <Ionicons name="mail-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+                                    <Ionicons name="finger-print-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
                                     <TextInput
-                                        placeholder="email@company.com"
+                                        placeholder="e.g. AA:BB:CC:DD:EE:FF"
                                         placeholderTextColor="#999"
                                         style={styles.input}
-                                        value={form.email}
-                                        onChangeText={(v) => handleInputChange("email", v)}
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.inputGroup}>
-                                <Text style={styles.label}>Phone Number</Text>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="call-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
-                                    <TextInput
-                                        placeholder="0123456789"
-                                        placeholderTextColor="#999"
-                                        style={styles.input}
-                                        value={form.phoneNumber}
-                                        onChangeText={(v) => handleInputChange("phoneNumber", v)}
-                                        keyboardType="phone-pad"
+                                        value={form.macAddress}
+                                        onChangeText={(v) => handleInputChange("macAddress", v)}
+                                        autoCapitalize="characters"
                                     />
                                 </View>
                             </View>
 
                             <TouchableOpacity
-                                style={[styles.saveButton, (loading || departments.length === 0) && styles.disabled]}
+                                style={[styles.saveButton, loading && styles.disabled]}
                                 onPress={onSave}
-                                disabled={loading || departments.length === 0}
+                                disabled={loading}
+                                activeOpacity={0.8}
                             >
                                 <LinearGradient
                                     colors={["#00F2FE", "#4FACFE"]}
@@ -274,7 +257,7 @@ export function AddEmployeeScreen({ navigation }: Props) {
                                     {loading ? (
                                         <ActivityIndicator color="white" />
                                     ) : (
-                                        <Text style={styles.saveButtonText}>CREATE EMPLOYEE</Text>
+                                        <Text style={styles.saveButtonText}>INITIALIZE NODE</Text>
                                     )}
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -298,7 +281,7 @@ export function AddEmployeeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "#F8F9FA",
     },
     safeArea: {
         flex: 1,
@@ -312,28 +295,24 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingHorizontal: 20,
         paddingVertical: 15,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "#F8F9FA",
         zIndex: 10,
     },
     backButton: {
         padding: 5,
     },
     title: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: "bold",
         color: "#1A1A1A",
-        letterSpacing: -0.5,
+        letterSpacing: 0.5,
     },
     scrollContent: {
         paddingHorizontal: 25,
         paddingBottom: 40,
     },
     form: {
-        marginTop: 15,
-    },
-    inputRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        marginTop: 10,
     },
     inputGroup: {
         marginBottom: 20,
@@ -350,22 +329,25 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#F8F9FA",
-        borderRadius: 20,
-        paddingHorizontal: 18,
-        height: 60,
+        backgroundColor: "white",
+        borderRadius: 18,
+        paddingHorizontal: 15,
+        height: 58,
         borderWidth: 1,
-        borderColor: "#F0F0F0",
+        borderColor: "#E0E0E0",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 2,
     },
     inputIcon: {
         marginRight: 12,
-        opacity: 0.8,
     },
     input: {
         flex: 1,
         color: "#1A1A1A",
         fontSize: 16,
-        fontWeight: "500",
     },
     selectorScroll: {
         flexDirection: "row",
@@ -373,14 +355,15 @@ const styles = StyleSheet.create({
     },
     selectorItem: {
         paddingHorizontal: 16,
-        paddingVertical: 10,
+        paddingVertical: 12,
         borderRadius: 15,
-        backgroundColor: "#F8F9FA",
+        backgroundColor: "white",
         borderWidth: 1,
-        borderColor: "#F0F0F0",
+        borderColor: "#E0E0E0",
         marginRight: 10,
-        minWidth: 100,
+        minWidth: 80,
         alignItems: "center",
+        justifyContent: "center",
     },
     selectorItemActive: {
         borderColor: "#4FACFE",
@@ -402,9 +385,9 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         height: 64,
-        borderRadius: 22,
+        borderRadius: 20,
         overflow: "hidden",
-        marginTop: 25,
+        marginTop: 30,
         elevation: 8,
         shadowColor: "#4FACFE",
         shadowOffset: { width: 0, height: 6 },
@@ -421,9 +404,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         letterSpacing: 2,
-        textTransform: "uppercase",
     },
     disabled: {
         opacity: 0.7,
     },
 });
+
+
+

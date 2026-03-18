@@ -15,24 +15,31 @@ import {
     View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Department, departmentApi } from "../api/department.api";
-import { AppStackParamList } from "../types/navigation.types";
+import { shiftApi } from "../../api/shift.api";
+import { Shift } from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
-type Props = NativeStackScreenProps<AppStackParamList, "DepartmentList">;
+type Props = NativeStackScreenProps<AppStackParamList, "ShiftList">;
 
-export function DepartmentListScreen({ navigation }: Props) {
-    const [departments, setDepartments] = useState<Department[]>([]);
+const formatTime = (timeStr: string) => {
+    if (!timeStr) return "--:--";
+    const parts = timeStr.split(":");
+    return `${parts[0]}:${parts[1]}`;
+};
+
+export function ShiftListScreen({ navigation }: Props) {
+    const [shifts, setShifts] = useState<Shift[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState("");
 
-    const loadDepartments = useCallback(async (showLoader = true) => {
+    const loadShifts = useCallback(async (showLoader = true) => {
         try {
             if (showLoader) setLoading(true);
-            const data = await departmentApi.getDepartments();
-            setDepartments(data);
+            const data = await shiftApi.getShifts();
+            setShifts(data);
         } catch (error: any) {
-            console.error("Error loading departments:", error);
+            console.error("Error loading shifts:", error);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -40,39 +47,51 @@ export function DepartmentListScreen({ navigation }: Props) {
     }, []);
 
     useEffect(() => {
-        loadDepartments();
-    }, [loadDepartments]);
+        loadShifts();
+    }, [loadShifts]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", () => {
-            loadDepartments(false);
+            loadShifts(false);
         });
         return unsubscribe;
-    }, [navigation, loadDepartments]);
+    }, [navigation, loadShifts]);
 
     const onRefresh = () => {
         setRefreshing(true);
-        loadDepartments(false);
+        loadShifts(false);
     };
 
-    const filtered = departments.filter(
-        (d) =>
-            d.name.toLowerCase().includes(search.toLowerCase()) ||
-            d.departmentCode.toLowerCase().includes(search.toLowerCase())
+    const filtered = shifts.filter(
+        (s) =>
+            s.name.toLowerCase().includes(search.toLowerCase()) ||
+            s.shiftCode.toLowerCase().includes(search.toLowerCase())
     );
 
-    const renderItem = ({ item, index }: { item: Department; index: number }) => (
+    const renderItem = ({ item, index }: { item: Shift; index: number }) => (
         <Animated.View entering={FadeInDown.delay(index * 80).duration(500)}>
             <View style={styles.card}>
                 <View style={styles.cardIcon}>
-                    <Ionicons name="business" size={22} color="#4FACFE" />
+                    <Ionicons name="time" size={22} color="#00F2FE" />
                 </View>
                 <View style={styles.cardContent}>
-                    <Text style={styles.cardTitle}>{item.name}</Text>
-                    <Text style={styles.cardCode}>{item.departmentCode}</Text>
-                    {item.description ? (
-                        <Text style={styles.cardDesc} numberOfLines={2}>{item.description}</Text>
-                    ) : null}
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.cardTitle}>{item.name}</Text>
+                        <View style={styles.codeBadge}>
+                            <Text style={styles.codeText}>{item.shiftCode}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.timeRow}>
+                        <View style={styles.timeBlock}>
+                            <Ionicons name="log-in-outline" size={14} color="#00C853" />
+                            <Text style={styles.timeText}>{formatTime(item.startTime)}</Text>
+                        </View>
+                        <Ionicons name="arrow-forward" size={14} color="#CCC" />
+                        <View style={styles.timeBlock}>
+                            <Ionicons name="log-out-outline" size={14} color="#FF4D4D" />
+                            <Text style={styles.timeText}>{formatTime(item.endTime)}</Text>
+                        </View>
+                    </View>
                 </View>
             </View>
         </Animated.View>
@@ -87,10 +106,10 @@ export function DepartmentListScreen({ navigation }: Props) {
                         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                             <Ionicons name="chevron-back" size={28} color="#1A1A1A" />
                         </TouchableOpacity>
-                        <Text style={styles.title}>Departments</Text>
+                        <Text style={styles.title}>Shifts</Text>
                         <TouchableOpacity
                             style={styles.addBtn}
-                            onPress={() => navigation.navigate("AddDepartment")}
+                            onPress={() => navigation.navigate("AddShift")}
                         >
                             <LinearGradient colors={["#00F2FE", "#4FACFE"]} style={styles.addGrad}>
                                 <Ionicons name="add" size={26} color="white" />
@@ -101,7 +120,7 @@ export function DepartmentListScreen({ navigation }: Props) {
                     <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.searchBox}>
                         <Ionicons name="search" size={20} color="#999" style={{ marginRight: 12 }} />
                         <TextInput
-                            placeholder="Search departments..."
+                            placeholder="Search shifts..."
                             placeholderTextColor="#999"
                             style={styles.searchInput}
                             value={search}
@@ -118,12 +137,12 @@ export function DepartmentListScreen({ navigation }: Props) {
                 {loading && !refreshing ? (
                     <View style={styles.center}>
                         <ActivityIndicator size="large" color="#4FACFE" />
-                        <Text style={styles.loadingText}>Loading departments...</Text>
+                        <Text style={styles.loadingText}>Loading shifts...</Text>
                     </View>
                 ) : (
                     <FlatList
                         data={filtered}
-                        keyExtractor={(item) => item.id.toString()}
+                        keyExtractor={(item) => item.id}
                         renderItem={renderItem}
                         contentContainerStyle={styles.list}
                         showsVerticalScrollIndicator={false}
@@ -132,9 +151,9 @@ export function DepartmentListScreen({ navigation }: Props) {
                         }
                         ListEmptyComponent={
                             <View style={styles.empty}>
-                                <Ionicons name="business-outline" size={80} color="#E0E0E0" />
-                                <Text style={styles.emptyText}>No departments found</Text>
-                                <TouchableOpacity style={styles.retryBtn} onPress={() => loadDepartments()}>
+                                <Ionicons name="time-outline" size={80} color="#E0E0E0" />
+                                <Text style={styles.emptyText}>No shifts found</Text>
+                                <TouchableOpacity style={styles.retryBtn} onPress={() => loadShifts()}>
                                     <Text style={styles.retryText}>Refresh</Text>
                                 </TouchableOpacity>
                             </View>
@@ -170,13 +189,19 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.04, shadowRadius: 10, elevation: 2,
     },
     cardIcon: {
-        width: 48, height: 48, borderRadius: 16, backgroundColor: "rgba(79, 172, 254, 0.1)",
+        width: 48, height: 48, borderRadius: 16, backgroundColor: "rgba(0, 242, 254, 0.1)",
         justifyContent: "center", alignItems: "center", marginRight: 14,
     },
     cardContent: { flex: 1 },
-    cardTitle: { fontSize: 17, fontWeight: "bold", color: "#1A1A1A" },
-    cardCode: { fontSize: 13, color: "#4FACFE", fontWeight: "600", marginTop: 2 },
-    cardDesc: { fontSize: 13, color: "#999", marginTop: 4 },
+    cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+    cardTitle: { fontSize: 17, fontWeight: "bold", color: "#1A1A1A", flex: 1 },
+    codeBadge: { backgroundColor: "rgba(0, 242, 254, 0.1)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+    codeText: { fontSize: 11, fontWeight: "700", color: "#00C8D6", textTransform: "uppercase" },
+    timeRow: { flexDirection: "row", alignItems: "center", marginTop: 8, gap: 8 },
+    timeBlock: { flexDirection: "row", alignItems: "center", gap: 4 },
+    timeText: { fontSize: 15, fontWeight: "600", color: "#333" },
+    statsRow: { flexDirection: "row", marginTop: 6, gap: 12 },
+    statText: { fontSize: 12, color: "#999", fontWeight: "500" },
     empty: { marginTop: 100, alignItems: "center", justifyContent: "center" },
     emptyText: { color: "#999", fontSize: 18, marginTop: 12 },
     retryBtn: { marginTop: 25, paddingHorizontal: 35, paddingVertical: 14, borderRadius: 28, borderWidth: 1.5, borderColor: "#4FACFE" },

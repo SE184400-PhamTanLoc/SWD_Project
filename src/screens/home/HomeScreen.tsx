@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -12,13 +13,18 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { useAuth } from "../context/AuthContext";
-import { AppStackParamList } from "../types/navigation.types";
+import { useAuth } from "../../context/AuthContext";
+import { dashboardService } from "../../service/dashboard.service";
+import { employeeService } from "../../service/employee.service";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "Home">;
 
 export function HomeScreen({ navigation }: Props) {
   const { logout, user } = useAuth();
+  const [employeeCount, setEmployeeCount] = useState(0);
+  const [attendanceRate, setAttendanceRate] = useState(0);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -27,8 +33,8 @@ export function HomeScreen({ navigation }: Props) {
     return "Good Evening";
   };
 
-  const isAdmin = user?.roles?.some(r =>
-    ["ADMIN", "ADMINISTRATOR", "HR"].includes(r.toUpperCase())
+  const isAdmin = user?.roles?.some((r) =>
+    ["ADMIN", "ADMINISTRATOR", "HR"].includes(r.toUpperCase()),
   );
 
   const today = new Date();
@@ -39,9 +45,54 @@ export function HomeScreen({ navigation }: Props) {
     day: "numeric",
   });
 
+  const heroTopPadding =
+    (Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0) + 16;
+
+  useEffect(() => {
+    loadHeroStats();
+  }, []);
+
+  const loadHeroStats = async () => {
+    try {
+      setStatsLoading(true);
+
+      const [employeesResult, todayResult] = await Promise.allSettled([
+        employeeService.getEmployees(),
+        dashboardService.getTodayAttendance(),
+      ]);
+
+      let totalEmployees = 0;
+      let presentEmployees = 0;
+
+      if (employeesResult.status === "fulfilled") {
+        totalEmployees = employeesResult.value.length;
+      }
+
+      if (todayResult.status === "fulfilled") {
+        presentEmployees = todayResult.value.present;
+        if (totalEmployees === 0) {
+          totalEmployees = todayResult.value.totalEmployees;
+        }
+      }
+
+      setEmployeeCount(totalEmployees);
+      setAttendanceRate(
+        totalEmployees > 0 ? (presentEmployees / totalEmployees) * 100 : 0,
+      );
+    } catch (error) {
+      console.warn("Failed to load home stats", error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#1A1A2E"
+        translucent={false}
+      />
       <SafeAreaView style={styles.safeArea}>
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -52,20 +103,32 @@ export function HomeScreen({ navigation }: Props) {
             colors={["#1A1A2E", "#16213E", "#0F3460"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.heroGradient}
+            style={[styles.heroGradient, { paddingTop: heroTopPadding }]}
           >
-            <Animated.View entering={FadeInUp.duration(800)} style={styles.header}>
+            <Animated.View
+              entering={FadeInUp.duration(800)}
+              style={styles.header}
+            >
               <View style={styles.headerLeft}>
                 <Text style={styles.greetingText}>{getGreeting()},</Text>
-                <Text style={styles.userName}>{user?.fullName || user?.username || "Admin"}</Text>
+                <Text style={styles.userName}>
+                  {user?.fullName || user?.username || "Admin"}
+                </Text>
                 {user?.roles && user.roles.length > 0 && (
                   <View style={styles.roleBadge}>
-                    <Ionicons name="shield-checkmark" size={10} color="#4FACFE" />
+                    <Ionicons
+                      name="shield-checkmark"
+                      size={10}
+                      color="#4FACFE"
+                    />
                     <Text style={styles.roleText}>{user.roles[0]}</Text>
                   </View>
                 )}
               </View>
-              <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.profileButton}
+                activeOpacity={0.7}
+              >
                 <LinearGradient
                   colors={["#4FACFE", "#00F2FE"]}
                   start={{ x: 0, y: 0 }}
@@ -79,29 +142,53 @@ export function HomeScreen({ navigation }: Props) {
             </Animated.View>
 
             {/* Date Banner */}
-            <Animated.View entering={FadeInDown.delay(200).duration(600)} style={styles.dateBanner}>
-              <Ionicons name="calendar-outline" size={14} color="rgba(255,255,255,0.5)" />
+            <Animated.View
+              entering={FadeInDown.delay(200).duration(600)}
+              style={styles.dateBanner}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={14}
+                color="rgba(255,255,255,0.5)"
+              />
               <Text style={styles.dateText}>{dateStr}</Text>
             </Animated.View>
 
             {/* Quick Stats inside hero */}
-            <Animated.View entering={FadeInDown.delay(300).duration(800)} style={styles.statsRow}>
+            <Animated.View
+              entering={FadeInDown.delay(300).duration(800)}
+              style={styles.statsRow}
+            >
               <View style={styles.statBox}>
-                <View style={[styles.statIconCircle, { backgroundColor: "rgba(79, 172, 254, 0.2)" }]}>
+                <View
+                  style={[
+                    styles.statIconCircle,
+                    { backgroundColor: "rgba(79, 172, 254, 0.2)" },
+                  ]}
+                >
                   <Ionicons name="people" size={18} color="#4FACFE" />
                 </View>
                 <View>
-                  <Text style={styles.statValue}>124</Text>
+                  <Text style={styles.statValue}>
+                    {statsLoading ? "..." : employeeCount}
+                  </Text>
                   <Text style={styles.statName}>Employees</Text>
                 </View>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statBox}>
-                <View style={[styles.statIconCircle, { backgroundColor: "rgba(0, 242, 254, 0.2)" }]}>
+                <View
+                  style={[
+                    styles.statIconCircle,
+                    { backgroundColor: "rgba(0, 242, 254, 0.2)" },
+                  ]}
+                >
                   <Ionicons name="checkmark-circle" size={18} color="#00F2FE" />
                 </View>
                 <View>
-                  <Text style={styles.statValue}>82%</Text>
+                  <Text style={styles.statValue}>
+                    {statsLoading ? "..." : `${attendanceRate.toFixed(1)}%`}
+                  </Text>
                   <Text style={styles.statName}>Attendance</Text>
                 </View>
               </View>
@@ -111,6 +198,37 @@ export function HomeScreen({ navigation }: Props) {
           <View style={styles.content}>
             {/* ─── Primary Action: Employees ─── */}
             <Animated.View entering={FadeInDown.delay(400).duration(800)}>
+              <TouchableOpacity
+                style={styles.primaryCard}
+                onPress={() => navigation.navigate("Dashboard")}
+                activeOpacity={0.9}
+              >
+                <LinearGradient
+                  colors={["#667EEA", "#764BA2"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.primaryGradient}
+                >
+                  <View style={styles.primaryIconWrap}>
+                    <Ionicons name="stats-chart" size={28} color="white" />
+                  </View>
+                  <View style={styles.primaryTextWrap}>
+                    <Text style={styles.primaryTitle}>Dashboard</Text>
+                    <Text style={styles.primaryDesc}>
+                      View attendance analytics
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={22}
+                    color="rgba(255,255,255,0.7)"
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
+
+            {/* ─── Primary Action: Employees ─── */}
+            <Animated.View entering={FadeInDown.delay(500).duration(800)}>
               <TouchableOpacity
                 style={styles.primaryCard}
                 onPress={() => navigation.navigate("EmployeeList")}
@@ -127,9 +245,15 @@ export function HomeScreen({ navigation }: Props) {
                   </View>
                   <View style={styles.primaryTextWrap}>
                     <Text style={styles.primaryTitle}>Employees</Text>
-                    <Text style={styles.primaryDesc}>View & manage staff registry</Text>
+                    <Text style={styles.primaryDesc}>
+                      View & manage staff registry
+                    </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={22} color="rgba(255,255,255,0.7)" />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={22}
+                    color="rgba(255,255,255,0.7)"
+                  />
                 </LinearGradient>
               </TouchableOpacity>
             </Animated.View>
@@ -137,17 +261,25 @@ export function HomeScreen({ navigation }: Props) {
             {/* ─── Management (Admin only) ─── */}
             {isAdmin && (
               <>
-                <Animated.View entering={FadeInDown.delay(500).duration(800)}>
+                <Animated.View entering={FadeInDown.delay(600).duration(800)}>
                   <Text style={styles.sectionTitle}>Management</Text>
                 </Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.compactRow}>
+                <Animated.View
+                  entering={FadeInDown.delay(700).duration(800)}
+                  style={styles.compactRow}
+                >
                   <TouchableOpacity
                     style={styles.compactCard}
                     onPress={() => navigation.navigate("DepartmentList")}
                     activeOpacity={0.85}
                   >
-                    <View style={[styles.compactIcon, { backgroundColor: "rgba(79, 172, 254, 0.1)" }]}>
+                    <View
+                      style={[
+                        styles.compactIcon,
+                        { backgroundColor: "rgba(79, 172, 254, 0.1)" },
+                      ]}
+                    >
                       <Ionicons name="business" size={22} color="#4FACFE" />
                     </View>
                     <Text style={styles.compactTitle}>Depts</Text>
@@ -159,7 +291,12 @@ export function HomeScreen({ navigation }: Props) {
                     onPress={() => navigation.navigate("ProductionLineList")}
                     activeOpacity={0.85}
                   >
-                    <View style={[styles.compactIcon, { backgroundColor: "rgba(0, 200, 150, 0.1)" }]}>
+                    <View
+                      style={[
+                        styles.compactIcon,
+                        { backgroundColor: "rgba(0, 200, 150, 0.1)" },
+                      ]}
+                    >
                       <Ionicons name="git-network" size={22} color="#00C896" />
                     </View>
                     <Text style={styles.compactTitle}>Lines</Text>
@@ -171,7 +308,12 @@ export function HomeScreen({ navigation }: Props) {
                     onPress={() => navigation.navigate("ShiftList")}
                     activeOpacity={0.85}
                   >
-                    <View style={[styles.compactIcon, { backgroundColor: "rgba(255, 152, 0, 0.1)" }]}>
+                    <View
+                      style={[
+                        styles.compactIcon,
+                        { backgroundColor: "rgba(255, 152, 0, 0.1)" },
+                      ]}
+                    >
                       <Ionicons name="time" size={22} color="#FF9800" />
                     </View>
                     <Text style={styles.compactTitle}>Shifts</Text>
@@ -183,7 +325,12 @@ export function HomeScreen({ navigation }: Props) {
                     onPress={() => navigation.navigate("ShiftAssignmentList")}
                     activeOpacity={0.85}
                   >
-                    <View style={[styles.compactIcon, { backgroundColor: "rgba(118, 75, 162, 0.1)" }]}>
+                    <View
+                      style={[
+                        styles.compactIcon,
+                        { backgroundColor: "rgba(118, 75, 162, 0.1)" },
+                      ]}
+                    >
                       <Ionicons name="calendar" size={22} color="#764BA2" />
                     </View>
                     <Text style={styles.compactTitle}>Assigns</Text>
@@ -194,17 +341,42 @@ export function HomeScreen({ navigation }: Props) {
             )}
 
             {/* ─── System ─── */}
-            <Animated.View entering={FadeInDown.delay(700).duration(800)}>
+            <Animated.View entering={FadeInDown.delay(800).duration(800)}>
               <Text style={styles.sectionTitle}>System</Text>
             </Animated.View>
 
-            <Animated.View entering={FadeInDown.delay(800).duration(800)} style={styles.compactRow}>
+            <Animated.View
+              entering={FadeInDown.delay(900).duration(800)}
+              style={styles.compactRow}
+            >
+              <TouchableOpacity
+                style={styles.compactCard}
+                onPress={() => navigation.navigate("AttendanceHistory", {})}
+                activeOpacity={0.85}
+              >
+                <View
+                  style={[
+                    styles.compactIcon,
+                    { backgroundColor: "rgba(16, 185, 129, 0.1)" },
+                  ]}
+                >
+                  <Ionicons name="list" size={22} color="#10B981" />
+                </View>
+                <Text style={styles.compactTitle}>History</Text>
+                <Text style={styles.compactSub}>Attendance</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.compactCard}
                 onPress={() => navigation.navigate("AttendanceCheckIn" as any)}
                 activeOpacity={0.85}
               >
-                <View style={[styles.compactIcon, { backgroundColor: "rgba(102, 126, 234, 0.1)" }]}>
+                <View
+                  style={[
+                    styles.compactIcon,
+                    { backgroundColor: "rgba(102, 126, 234, 0.1)" },
+                  ]}
+                >
                   <Ionicons name="scan" size={22} color="#667EEA" />
                 </View>
                 <Text style={styles.compactTitle}>Check-in</Text>
@@ -216,7 +388,12 @@ export function HomeScreen({ navigation }: Props) {
                 onPress={() => navigation.navigate("IoTDeviceList")}
                 activeOpacity={0.85}
               >
-                <View style={[styles.compactIcon, { backgroundColor: "rgba(75, 121, 161, 0.1)" }]}>
+                <View
+                  style={[
+                    styles.compactIcon,
+                    { backgroundColor: "rgba(75, 121, 161, 0.1)" },
+                  ]}
+                >
                   <Ionicons name="hardware-chip" size={22} color="#4B79A1" />
                 </View>
                 <Text style={styles.compactTitle}>IoT</Text>
@@ -224,23 +401,55 @@ export function HomeScreen({ navigation }: Props) {
               </TouchableOpacity>
 
               <TouchableOpacity
+                style={styles.compactCard}
+                onPress={() => navigation.navigate("Reports")}
+                activeOpacity={0.85}
+              >
+                <View
+                  style={[
+                    styles.compactIcon,
+                    { backgroundColor: "rgba(79, 172, 254, 0.12)" },
+                  ]}
+                >
+                  <Ionicons name="document-text" size={22} color="#4FACFE" />
+                </View>
+                <Text style={styles.compactTitle}>Reports</Text>
+                <Text style={styles.compactSub}>Analytics + Export</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
                 style={styles.logoutCard}
                 onPress={logout}
                 activeOpacity={0.85}
               >
-                <View style={[styles.compactIcon, { backgroundColor: "rgba(255, 77, 77, 0.1)", marginBottom: 0, marginRight: 15 }]}>
+                <View
+                  style={[
+                    styles.compactIcon,
+                    {
+                      backgroundColor: "rgba(255, 77, 77, 0.1)",
+                      marginBottom: 0,
+                      marginRight: 15,
+                    },
+                  ]}
+                >
                   <Ionicons name="log-out" size={22} color="#FF4D4D" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.compactTitle, { color: "#FF4D4D" }]}>Logout</Text>
+                  <Text style={[styles.compactTitle, { color: "#FF4D4D" }]}>
+                    Logout
+                  </Text>
                   <Text style={styles.compactSub}>Sign out securely</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="rgba(255, 77, 77, 0.5)" />
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color="rgba(255, 77, 77, 0.5)"
+                />
               </TouchableOpacity>
             </Animated.View>
 
             {/* ─── Quick Tips Card ─── */}
-            <Animated.View entering={FadeInDown.delay(900).duration(800)}>
+            <Animated.View entering={FadeInDown.delay(1000).duration(800)}>
               <View style={styles.tipsCard}>
                 <View style={styles.tipsHeader}>
                   <View style={styles.tipsIconWrap}>
@@ -250,21 +459,30 @@ export function HomeScreen({ navigation }: Props) {
                 </View>
                 <View style={styles.tipItem}>
                   <View style={styles.tipDot} />
-                  <Text style={styles.tipText}>Use face recognition for faster attendance check-in</Text>
+                  <Text style={styles.tipText}>
+                    Use face recognition for faster attendance check-in
+                  </Text>
                 </View>
                 <View style={styles.tipItem}>
                   <View style={styles.tipDot} />
-                  <Text style={styles.tipText}>Create departments before adding production lines</Text>
+                  <Text style={styles.tipText}>
+                    Create departments before adding production lines
+                  </Text>
                 </View>
                 <View style={styles.tipItem}>
                   <View style={styles.tipDot} />
-                  <Text style={styles.tipText}>Pull down to refresh on any list screen</Text>
+                  <Text style={styles.tipText}>
+                    Pull down to refresh on any list screen
+                  </Text>
                 </View>
               </View>
             </Animated.View>
 
             {/* Footer */}
-            <Animated.View entering={FadeInDown.delay(1000).duration(800)} style={styles.footer}>
+            <Animated.View
+              entering={FadeInDown.delay(1100).duration(800)}
+              style={styles.footer}
+            >
               <Text style={styles.footerText}>HRMS Face Attendance v1.0</Text>
               <Text style={styles.footerSub}>Smart Workforce Management</Text>
             </Animated.View>

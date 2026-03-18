@@ -21,8 +21,8 @@ import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { WebView } from "react-native-webview";
-import CustomAlert from "../components/CustomAlert";
-import { AuthStackParamList } from "../types/AuthParam";
+import CustomAlert from "../../components/CustomAlert";
+import { AuthStackParamList } from "../../types/AuthParam";
 
 const { width, height } = Dimensions.get("window");
 

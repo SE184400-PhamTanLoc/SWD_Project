@@ -1,6 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API_BASE_URL, API_TIMEOUT, STORAGE_KEYS } from "../utils/constants";
+
+type UnauthorizedHandler = () => void | Promise<void>;
+
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+
+export const setUnauthorizedHandler = (handler: UnauthorizedHandler | null) => {
+  unauthorizedHandler = handler;
+};
+
 const axiosClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
@@ -28,7 +37,10 @@ axiosClient.interceptors.response.use(
   },
   async (error) => {
     if (error.response?.status === 401) {
-      await AsyncStorage.removeItem(STORAGE_KEYS.TOKEN);
+      await AsyncStorage.multiRemove([STORAGE_KEYS.TOKEN, STORAGE_KEYS.USER]);
+      if (unauthorizedHandler) {
+        await Promise.resolve(unauthorizedHandler());
+      }
     }
 
     const errorMessage =

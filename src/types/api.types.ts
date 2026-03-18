@@ -32,9 +32,22 @@ export interface IoTDevice {
   productionLineName?: string;
 }
 
+export interface IoTDeviceMonitoringDto {
+  deviceId: number;
+  location: string;
+  status: string;
+  lastHeartbeat?: string;
+}
+
+export interface IoTDeviceStatusDto {
+  deviceId: number;
+  status: string;
+  lastHeartbeat?: string;
+}
+
 export interface ProductionLine {
   id: number;
-  lineCode: string;
+  lineCode?: string;
   lineName: string;
   departmentId: number;
   departmentName?: string;
@@ -112,6 +125,144 @@ export interface FaceCheckInResponse {
   message: string;
   employeeName?: string;
   checkInTime?: string;
-  status?: "CheckedIn" | "CheckedOut" | "WrongLocation" | "UnknownFace" | "AlreadyCheckedOut" | "NoShiftToday" | "WrongShiftTime" | "Error";
+  status?:
+    | "CheckedIn"
+    | "CheckedOut"
+    | "WrongLocation"
+    | "UnknownFace"
+    | "AlreadyCheckedOut"
+    | "NoShiftToday"
+    | "WrongShiftTime"
+    | "Error";
   confidence?: number;
+}
+
+// ===== DASHBOARD TYPES =====
+export interface TodayAttendanceDto {
+  date: string; // ISO 8601 date
+  totalEmployees: number;
+  present: number;
+  late: number;
+  absent: number;
+}
+
+export interface DepartmentSummaryDto {
+  department: string;
+  totalEmployees: number;
+  present: number;
+  late: number;
+}
+
+export interface ProductionLineSummaryDto {
+  productionLine: string;
+  totalEmployees: number;
+  present: number;
+  late: number;
+}
+
+// ===== ATTENDANCE TYPES =====
+export interface AttendanceHistoryDto {
+  id: string; // GUID
+  employeeId?: string;
+  employeeName: string;
+  department?: string;
+  productionLine?: string;
+  checkInTime?: string; // ISO 8601 datetime
+  checkOutTime?: string;
+  totalHours?: number;
+  lateMinutes?: number;
+  earlyLeaveMinutes?: number;
+  status:
+    | "OnTime"
+    | "Late"
+    | "EarlyLeave"
+    | "Absent"
+    | "OnLeave"
+    | "SickLeave"
+    | "Present"
+    | "ExceptionPending";
+}
+
+export interface AttendanceHistoryListDto {
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  data: AttendanceHistoryDto[];
+}
+
+export interface AttendanceDetailDto {
+  id: string; // GUID
+  employeeId?: string;
+  employeeName: string;
+  department?: string;
+  productionLine?: string;
+  workDate: string; // ISO 8601 date
+  checkInTime?: string; // ISO 8601 datetime
+  checkOutTime?: string; // ISO 8601 datetime (optional)
+  lateMinutes: number;
+  earlyLeaveMinutes?: number;
+  totalHours: number;
+  status:
+    | "OnTime"
+    | "Late"
+    | "EarlyLeave"
+    | "Absent"
+    | "OnLeave"
+    | "SickLeave"
+    | "Present"
+    | "ExceptionPending";
+  deviceId?: string;
+  location?: string;
+  note?: string;
+  createdAt?: string;
+  source: "FaceRecognition" | "IoTDevice" | "Manual" | "Import" | "MobileApp"; // Nguồn check-in
+  confidenceScore?: number;
+}
+
+export interface UpdateAttendancePayload {
+  checkInTime?: string | null;
+  checkOutTime?: string | null;
+  note?: string | null;
+}
+
+export interface AttendanceQueryParams {
+  employeeId?: string; // UUID
+  departmentId?: number;
+  productionLineId?: number;
+  fromDate?: string; // ISO 8601 date
+  toDate?: string; // ISO 8601 date
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+// ===== REPORT TYPES =====
+export interface MonthlyAttendanceReportItemDto {
+  employeeId: string;
+  employeeCode: string;
+  employeeName: string;
+  department: string;
+  productionLine: string;
+  workingDays: number;
+  late: number;
+  earlyLeave: number;
+  lateMinutes: number;
+  earlyLeaveMinutes: number;
+  overtimeHours: number;
+  totalHours: number;
+}
+
+export interface ProductionLineAttendanceReportDto {
+  productionLineId?: number;
+  productionLine: string;
+  totalEmployees: number;
+  present: number;
+  late: number;
+}
+
+export interface DepartmentAttendanceReportDto {
+  departmentId: number;
+  department: string;
+  totalEmployees: number;
+  present: number;
+  late: number;
 }
