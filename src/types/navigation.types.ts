@@ -1,6 +1,7 @@
 export type AppStackParamList = {
   Home: undefined;
   Dashboard: undefined;
+  Reports: undefined;
   EmployeeList: undefined;
   AddEmployee: undefined;
   EnrollFace: { employeeId: string; employeeName: string };
@@ -18,11 +19,36 @@ export type AppStackParamList = {
       }
     | undefined;
   ProductionLineList: undefined;
-  AddProductionLine: undefined;
+  AddProductionLine:
+    | {
+        productionLine?: {
+          id: number;
+          lineName: string;
+          departmentId: number;
+          status: string;
+          capacity?: number;
+          machineCount?: number;
+        };
+      }
+    | undefined;
   ShiftList: undefined;
   AddShift: undefined;
   ShiftAssignmentList: undefined;
-  AddShiftAssignment: undefined;
+  AddShiftAssignment:
+    | {
+        assignment?: {
+          id: string;
+          employeeId: string;
+          employeeName: string;
+          shiftId: string;
+          shiftName: string;
+          fromDate: string;
+          toDate: string;
+          productionLineId?: number;
+          productionLineName?: string;
+        };
+      }
+    | undefined;
   AttendanceCheckIn: undefined;
   AttendanceHistory: {
     employeeId?: string;

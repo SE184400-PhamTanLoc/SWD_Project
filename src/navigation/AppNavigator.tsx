@@ -16,6 +16,7 @@ import {
   HomeScreen,
   IoTDeviceListScreen,
   ProductionLineListScreen,
+  ReportsScreen,
   ShiftAssignmentListScreen,
   ShiftListScreen,
 } from "../screens";
@@ -32,6 +33,7 @@ const AppNavigator = () => {
     >
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen name="Reports" component={ReportsScreen} />
       <Stack.Screen
         name="AttendanceHistory"
         component={AttendanceHistoryScreen}
