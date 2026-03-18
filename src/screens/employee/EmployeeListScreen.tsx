@@ -15,11 +15,11 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import CustomAlert from "../components/CustomAlert";
-import EmployeeCard from "../components/EmployeeCard";
-import { employeeService } from "../service/employee.service";
-import { Employee } from "../types/api.types";
-import { AppStackParamList } from "../types/navigation.types";
+import CustomAlert from "../../components/CustomAlert";
+import EmployeeCard from "../../components/EmployeeCard";
+import { employeeService } from "../../service/employee.service";
+import { Employee } from "../../types/api.types";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "EmployeeList">;
 

@@ -4,7 +4,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   Pressable,
@@ -18,8 +17,9 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Department, departmentApi } from "../api/department.api";
-import { AppStackParamList } from "../types/navigation.types";
+import { Department, departmentApi } from "../../api/department.api";
+import CustomAlert from "../../components/CustomAlert";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "DepartmentList">;
 
@@ -33,6 +33,13 @@ export function DepartmentListScreen({ navigation }: Props) {
   const [selectedDepartment, setSelectedDepartment] =
     useState<Department | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [alert, setAlert] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    type: "info" as "success" | "error" | "info",
+    onConfirm: undefined as (() => void) | undefined,
+  });
 
   const loadDepartments = useCallback(async (showLoader = true) => {
     try {
@@ -41,6 +48,13 @@ export function DepartmentListScreen({ navigation }: Props) {
       setDepartments(data);
     } catch (error: any) {
       console.error("Error loading departments:", error);
+      setAlert({
+        visible: true,
+        title: "Error",
+        message: error?.message || "Failed to load departments",
+        type: "error",
+        onConfirm: undefined,
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -106,7 +120,13 @@ export function DepartmentListScreen({ navigation }: Props) {
       setDeleteConfirmVisible(false);
       setSelectedDepartment(null);
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to delete department");
+      setAlert({
+        visible: true,
+        title: "Error",
+        message: error?.message || "Failed to delete department",
+        type: "error",
+        onConfirm: undefined,
+      });
     } finally {
       setDeletingId(null);
     }
@@ -323,6 +343,21 @@ export function DepartmentListScreen({ navigation }: Props) {
             </Pressable>
           </Pressable>
         </Modal>
+
+        <CustomAlert
+          visible={alert.visible}
+          title={alert.title}
+          message={alert.message}
+          type={alert.type}
+          onClose={() =>
+            setAlert((prev) => ({
+              ...prev,
+              visible: false,
+              onConfirm: undefined,
+            }))
+          }
+          onConfirm={alert.onConfirm}
+        />
       </SafeAreaView>
     </View>
   );

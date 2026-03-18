@@ -16,10 +16,10 @@ import {
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Department, departmentApi } from "../api/department.api";
-import CustomAlert from "../components/CustomAlert";
-import { employeeService } from "../service/employee.service";
-import { AppStackParamList } from "../types/navigation.types";
+import { Department, departmentApi } from "../../api/department.api";
+import CustomAlert from "../../components/CustomAlert";
+import { employeeService } from "../../service/employee.service";
+import { AppStackParamList } from "../../types/navigation.types";
 
 type Props = NativeStackScreenProps<AppStackParamList, "AddEmployee">;
 
