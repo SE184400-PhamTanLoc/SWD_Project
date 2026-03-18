@@ -20,11 +20,11 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import CustomAlert from "../components/CustomAlert";
-import { useAuth } from "../context/AuthContext";
-import { authService } from "../service/auth.service";
-import { AuthStackParamList } from "../types/AuthParam";
-import { Login } from "../types/api.types";
+import CustomAlert from "../../components/CustomAlert";
+import { useAuth } from "../../context/AuthContext";
+import { authService } from "../../service/auth.service";
+import { AuthStackParamList } from "../../types/AuthParam";
+import { Login } from "../../types/api.types";
 
 const { width } = Dimensions.get("window");
 

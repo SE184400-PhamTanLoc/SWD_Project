@@ -20,19 +20,21 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import CustomAlert from "../components/CustomAlert";
-import { authService } from "../service/auth.service";
-import { AuthStackParamList } from "../types/AuthParam";
-import { Register } from "../types/api.types";
+import CustomAlert from "../../components/CustomAlert";
+import { authService } from "../../service/auth.service";
+import { AuthStackParamList } from "../../types/AuthParam";
+import { Register } from "../../types/api.types";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
+
+const SELF_REGISTER_ROLE_ID = 4;
 
 export default function RegisterScreen({ navigation }: Props) {
   const [data, setData] = useState<Register>({
     username: "",
     password: "",
     confirmPassword: "",
-    roleId: 4, // Default to Employee
+    roleId: SELF_REGISTER_ROLE_ID,
   });
 
   const [errors, setErrors] = useState({
@@ -74,18 +76,37 @@ export default function RegisterScreen({ navigation }: Props) {
     if (formData.username.trim() === "") {
       newErrors.username = "Username is required";
       isValid = false;
+    } else if (formData.username.trim().length < 3) {
+      newErrors.username = "Username must be at least 3 characters";
+      isValid = false;
+    } else if (formData.username.trim().length > 50) {
+      newErrors.username = "Username must be at most 50 characters";
+      isValid = false;
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username.trim())) {
+      newErrors.username = "Username only allows letters, numbers and _";
+      isValid = false;
     }
 
     if (formData.password.trim() === "") {
       newErrors.password = "Password is required";
       isValid = false;
+    } else if (formData.password.trim().length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
+    } else if (formData.password.trim().length > 100) {
+      newErrors.password = "Password must be at most 100 characters";
+      isValid = false;
     }
-
     if (formData.confirmPassword.trim() === "") {
       newErrors.confirmPassword = "Please confirm your password";
       isValid = false;
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    if (formData.roleId !== SELF_REGISTER_ROLE_ID) {
+      newErrors.username = "Role is invalid";
       isValid = false;
     }
 
@@ -103,7 +124,7 @@ export default function RegisterScreen({ navigation }: Props) {
       username: data.username.trim(),
       password: data.password.trim(),
       confirmPassword: data.confirmPassword.trim(),
-      roleId: data.roleId,
+      roleId: SELF_REGISTER_ROLE_ID,
     };
 
     if (validateForm(trimmedData)) {
@@ -156,8 +177,14 @@ export default function RegisterScreen({ navigation }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
       >
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <Animated.View entering={FadeInUp.duration(1000).springify()} style={styles.header}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <Animated.View
+            entering={FadeInUp.duration(1000).springify()}
+            style={styles.header}
+          >
             <View style={styles.logoContainer}>
               <LinearGradient
                 colors={["#00F2FE", "#4FACFE"]}
@@ -167,7 +194,9 @@ export default function RegisterScreen({ navigation }: Props) {
               </LinearGradient>
             </View>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join us and manage your attendance</Text>
+            <Text style={styles.subtitle}>
+              Join us and manage your attendance
+            </Text>
           </Animated.View>
 
           <Animated.View
@@ -175,7 +204,12 @@ export default function RegisterScreen({ navigation }: Props) {
             style={styles.form}
           >
             <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color="#4FACFE"
+                style={styles.inputIcon}
+              />
               <TextInput
                 placeholder="Username"
                 value={data.username}
@@ -190,7 +224,12 @@ export default function RegisterScreen({ navigation }: Props) {
             ) : null}
 
             <View style={[styles.inputContainer, { marginTop: 15 }]}>
-              <Ionicons name="lock-closed-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#4FACFE"
+                style={styles.inputIcon}
+              />
               <TextInput
                 placeholder="Password"
                 value={data.password}
@@ -212,16 +251,25 @@ export default function RegisterScreen({ navigation }: Props) {
             ) : null}
 
             <View style={[styles.inputContainer, { marginTop: 15 }]}>
-              <Ionicons name="lock-closed-outline" size={20} color="#4FACFE" style={styles.inputIcon} />
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#4FACFE"
+                style={styles.inputIcon}
+              />
               <TextInput
                 placeholder="Confirm Password"
                 value={data.confirmPassword}
-                onChangeText={(text) => handleInputChange("confirmPassword", text)}
+                onChangeText={(text) =>
+                  handleInputChange("confirmPassword", text)
+                }
                 placeholderTextColor="#999"
                 secureTextEntry={!showConfirmPassword}
                 style={styles.input}
               />
-              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
                 <Ionicons
                   name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
                   size={20}

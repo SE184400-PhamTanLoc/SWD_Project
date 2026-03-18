@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { setUnauthorizedHandler } from "../api/axiosClient";
 import { storageService } from "../service/storage.service";
 
 interface User {
@@ -27,6 +28,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadStorageData();
   }, []);
 
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setToken(null);
+      setUser(null);
+    });
+
+    return () => {
+      setUnauthorizedHandler(null);
+    };
+  }, []);
+
   const loadStorageData = async () => {
     try {
       const storedToken = await storageService.getToken();
@@ -50,7 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     setToken(null);
     setUser(null);
-    storageService.clearAll();
+    storageService.clearAll().catch((error) => {
+      console.error("Error clearing auth data on logout:", error);
+    });
   };
 
   return (
